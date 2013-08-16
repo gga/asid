@@ -1,8 +1,12 @@
 (ns asid
-  (:use compojure.core)
+  (:use compojure.core
+        ring.middleware.resource
+        ring.middleware.file-info)
 
   (:require [compojure.route :as route]
-            [compojure.handler :as handler]))
+            [compojure.handler :as handler])
+
+  (:import java.io.File))
 
 (defroutes main-routes
   (GET "/favicon.ico" [] "")
