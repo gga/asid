@@ -1,3 +1,4 @@
 /.sass-cache/*
-/public/stylesheets/*.css
 /target/*
+/resources/public/stylesheets/*.css
+/resources/public/*.html
