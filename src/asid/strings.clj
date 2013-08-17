@@ -7,3 +7,5 @@
 (facts "to-hex"
   (to-hex "   ") => "0x202020")
 
+(defn uuid []
+  (str (java.util.UUID/randomUUID)))

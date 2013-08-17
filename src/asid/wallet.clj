@@ -26,7 +26,7 @@
 (defrecord Wallet [bag signatures key])
 
 (defn new-wallet []
-  (Wallet. {} {} (elliptic-key-pair)))
+  (Wallet. {:identity (uuid)} {} (elliptic-key-pair)))
 
 (facts "about new-wallet"
   (fact "should have a key"
@@ -34,4 +34,6 @@
   (fact "should have a public key"
     (-> (new-wallet) :key :public) =not=> nil?)
   (fact "should have a private key"
-    (-> (new-wallet) :key :private) =not=> nil?))
+    (-> (new-wallet) :key :private) =not=> nil?)
+  (fact "should have an identity"
+    (-> (new-wallet) :bag :identity) => #"[0-9a-f]+-[0-9a-f]+-[0-9a-f]+-[0-9a-f]+-[0-9a-f]+"))
