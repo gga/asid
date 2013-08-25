@@ -20,4 +20,7 @@
 
 (facts "about adding to a trust pool"
   (fact "should add with complete challenge"
-    (-> (add-to-pool (TrustPool. [:name] []) (new-wallet) {:identity "id" :url "url"} ["blah"]) :trustees count) => 1))
+    (-> (add-to-pool (TrustPool. [:name] [])
+                     (new-wallet)
+                     {:identity "id" :url "url"}
+                     ["blah"]) :trustees count) => 1))
