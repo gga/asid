@@ -28,7 +28,7 @@
             (let [new-id (wr/save wallet-repo (w/new-wallet id-seed))]
               (created (w/uri new-id))))))
 
-  (GET "/:id" [id]
+  (GET ["/:id", :id w/wallet-identity-grammar] [id]
        (-> (response (json/write-str (w/to-json (wr/get-wallet wallet-repo id))))
            (content-type "application/org.asidentity.wallet+json")))
 
