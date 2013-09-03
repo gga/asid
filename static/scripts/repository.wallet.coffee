@@ -13,6 +13,9 @@ define ['jquery'], ($) ->
       error: -> opts.elseFailed()
 
   get: (walletUri, opts) ->
-    $.get(walletUri)
-      .done((wallet) -> opts.ifSucceeded(wallet))
-      .fail(() -> opts.elseFailed())
+    $.ajax walletUri,
+      type: 'GET'
+      headers:
+        Accept: 'application/vnd.org.asidentity.wallet+json'
+      success: (wallet) -> opts.ifSucceeded(wallet)
+      error: -> opts.elseFailed()

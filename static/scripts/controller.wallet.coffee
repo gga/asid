@@ -5,7 +5,7 @@ define ['repository.wallet',
 
   launch: (walletUri) ->
     store.set('currentWalletUri', walletUri)
-    navigator.changePage('/wallet/')
+    navigator.changePage(walletUri)
 
   start: () ->
     walletRepo.get store.get('currentWalletUri'),

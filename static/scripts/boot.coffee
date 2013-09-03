@@ -5,4 +5,5 @@ require.config
 
 require ['asid'], (asid) ->
   path = window.location.pathname
-  asid[path].start() if asid[path]
+  controller = asid.controllerFor(path)
+  controller.start() if controller
