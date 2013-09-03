@@ -1,4 +1,11 @@
-define ['page.home'], (homePage) ->
+define ['page.home',
+        'repository.wallet',
+        'controller.wallet'], (homePage, walletRepo, walletController) ->
   start: () ->
     homePage.onNewIdentity ->
-      alert('user clicked new identity')
+      walletRepo.create
+        ifSucceeded: (uri) ->
+          console.log(uri)
+          walletController.start(uri)
+
+        elseFailed: ->
