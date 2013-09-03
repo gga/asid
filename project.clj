@@ -7,8 +7,10 @@
                  [enlive "1.1.1"]
                  [ring/ring-core "1.2.0"]
                  [ring/ring-jetty-adapter "1.2.0"]
-                 [bouncycastle/bcprov-jdk16 "140"]]
-  :profiles {:dev {:dependencies [[midje "1.5.0"]]}}
+                 [bouncycastle/bcprov-jdk16 "140"]
+                 [clojurewerkz/neocons "1.1.0"]]
+  :profiles {:dev {:dependencies [[midje "1.5.0"]
+                                  [ring-mock "0.1.5"]]}}
 
   :ring {:handler asid/app})
   

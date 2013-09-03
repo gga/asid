@@ -10,15 +10,13 @@
 
 
 (defn new-key-pair []
-  (do
-    (Security/addProvider (BouncyCastleProvider.))
-    (let [ecGenSpec (ECGenParameterSpec. "prime192v1")
-          keyGen (KeyPairGenerator/getInstance "ECDSA" "BC")]
-      (do
-        (.initialize keyGen ecGenSpec (SecureRandom.))
-        (let [pair (.generateKeyPair keyGen)]
-          {:public (to-hex (-> pair .getPublic .getEncoded))
-           :private (to-hex (-> pair .getPrivate .getEncoded))})))))
+  (Security/addProvider (BouncyCastleProvider.))
+  (let [ecGenSpec (ECGenParameterSpec. "prime192v1")
+        keyGen (KeyPairGenerator/getInstance "ECDSA" "BC")]
+    (.initialize keyGen ecGenSpec (SecureRandom.))
+    (let [pair (.generateKeyPair keyGen)]
+      {:public (to-hex (-> pair .getPublic .getEncoded))
+       :private (to-hex (-> pair .getPrivate .getEncoded))})))
 
 (fact "about key pair"
   (fact "public key should be a hex encoded string"
@@ -26,10 +24,10 @@
   (fact "private key should be a hex encoded string"
     (:private (new-key-pair)) => #"^[\d\w+/]+=$"))
 
-(defrecord Wallet [bag signatures key])
+(defrecord Wallet [identity bag signatures key])
 
 (defn new-wallet []
-  (Wallet. {:identity (uuid)} {} (new-key-pair)))
+  (Wallet. (uuid) {} {} (new-key-pair)))
 
 (facts "about new-wallet"
   (fact "should have a key"
@@ -39,21 +37,25 @@
   (fact "should have a private key"
     (-> (new-wallet) :key :private) =not=> nil?)
   (fact "should have an identity"
-    (-> (new-wallet) :bag :identity) => #"[0-9a-f]+-[0-9a-f]+-[0-9a-f]+-[0-9a-f]+-[0-9a-f]+"))
+    (-> (new-wallet) :identity) => #"[0-9a-f]+-[0-9a-f]+-[0-9a-f]+-[0-9a-f]+-[0-9a-f]+"))
+
+(defn uri [wallet]
+  (str "/" (-> wallet :identity)))
+
+(fact
+  (uri (Wallet. "fake-id" {} {} (new-key-pair))) => "/fake-id")
 
 (defn private-key [wallet]
   (let [factory (KeyFactory/getInstance "ECDSA" "BC")]
     (.generatePrivate factory (PKCS8EncodedKeySpec. (from-hex (-> wallet :key :private))))))
 
 (defn sign [me other-id key value]
-  (do
-    (Security/addProvider (BouncyCastleProvider.))
-    (let [sig (Signature/getInstance "ECDSA" "BC")
-          packet (json/write-str {:signer (-> me :bag :identity)
-                                  :trustee other-id
-                                  :key key
-                                  :value value})]
-      (do
-        (.initSign sig (private-key me) (SecureRandom.))
-        (.update sig (.getBytes packet "UTF-8"))
-        (to-hex (.sign sig))))))
+  (Security/addProvider (BouncyCastleProvider.))
+  (let [sig (Signature/getInstance "ECDSA" "BC")
+        packet (json/write-str {:signer (-> me :identity)
+                                :trustee other-id
+                                :key key
+                                :value value})]
+    (.initSign sig (private-key me) (SecureRandom.))
+    (.update sig (.getBytes packet "UTF-8"))
+    (to-hex (.sign sig))))
