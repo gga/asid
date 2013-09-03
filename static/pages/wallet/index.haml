@@ -3,9 +3,18 @@
   %head
     %title asid: a decentralized, trustable identity system
 
+    <!-- This desperately needs to be fixed -->
+    %script(src="/scripts/icanhaz.js")
     %script(data-main="/scripts/boot" src="/scripts/require.js")
+
+    %script#walletTmpl(type="text/html")
+      %h3 {{ identity }}
+      %code {{ key.public }}
 
   %body
     .container
       .header
         %h1 asid wallet
+
+      .content
+        .wallet

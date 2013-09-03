@@ -10,6 +10,10 @@ namespace :build do
 
   task :coffee => Dir['static/scripts/*.coffee'].collect { |file| coffee(file, output: 'resources/public/scripts') }
 
+  task :libs do
+    cp Dir["static/libs/*.js"], "resources/public/scripts"
+  end
+
   task :compass do
     sh "compass compile ."
   end
@@ -17,7 +21,7 @@ namespace :build do
 end
 
 desc "Builds all static files for the web app"
-task :build => ['build:haml', 'build:compass', 'build:coffee']
+task :build => ['build:haml', 'build:compass', 'build:coffee', 'build:libs']
 
 desc "Starts server"
 task :start => :build do

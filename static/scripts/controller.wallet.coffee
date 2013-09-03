@@ -1,6 +1,7 @@
 define ['repository.wallet',
+        'page.myWallet',
         'store',
-        'navigator'], (walletRepo, store, navigator) ->
+        'navigator'], (walletRepo, myWallet, store, navigator) ->
 
   launch: (walletUri) ->
     store.set('currentWalletUri', walletUri)
@@ -9,6 +10,6 @@ define ['repository.wallet',
   start: () ->
     walletRepo.get store.get('currentWalletUri'),
       ifSucceeded: (data) ->
-        console.log(data)
+        myWallet.render(data)
       elseFailed: () ->
         console.log("Error! Couldn't get wallet.")
