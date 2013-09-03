@@ -13,7 +13,13 @@
         (nrl/create root asid-root :asid)
         {:root asid-root}))))
 
+(defn attach-to-node [node link data]
+  (let [data-node (nn/create data)]
+        (nrl/create node data-node link)))
+
 (defn save [ctxt wallet]
   (let [node (nn/create {:identity (:identity wallet)})]
+    (doseq [data [:bag :signatures :key]]
+      (attach-to-node node data (get wallet data)))
     (nrl/create (:root ctxt) node :wallet)
     wallet))
