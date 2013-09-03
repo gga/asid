@@ -11,6 +11,17 @@
         %h1 asid
 
       .content
+        %p
+          Please provide some unique text to seed the creation or your identity. This
+          is used to help ensure your identity is globally unique. An email address
+          or a domain name is good.
+        %p
+          It is not possible
+          to extract this information out of the identity. And it will also not be
+          stored anywhere.
+
+        %p.error
+        %input#id-seed(type="text")
         %a#new-identity(href="#") New Identity&hellip;
 
       .footer

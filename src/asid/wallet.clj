@@ -5,7 +5,7 @@
   (:require [clojure.data.json :as json])
 
   (:import [org.bouncycastle.jce.provider BouncyCastleProvider]
-           [java.security KeyFactory Security KeyPairGenerator SecureRandom Signature]
+           [java.security KeyFactory Security KeyPairGenerator SecureRandom Signature MessageDigest]
            [java.security.spec ECGenParameterSpec PKCS8EncodedKeySpec]))
 
 
@@ -26,18 +26,42 @@
 
 (defrecord Wallet [identity bag signatures key])
 
-(defn new-wallet []
-  (Wallet. (uuid) {} {} (new-key-pair)))
+(defn- salt [length]
+  (let [rand (SecureRandom/getInstance "SHA1PRNG")
+        salt-bytes (make-array Byte/TYPE length)]
+    (.nextBytes rand salt-bytes)
+    salt-bytes))
+
+(defn- sha [message salt]
+  (apply str
+         (map (partial format "%02x")
+              (.digest (doto (MessageDigest/getInstance "SHA-1")
+                         .reset
+                         (.update (byte-array (mapcat seq [(.getBytes message) salt]))))))))
+
+(defn- new-identity [id-seed]
+  (sha id-seed (salt 20)))
+
+(facts "about new-identity"
+  (fact "should generate an alpha-numeric string as the identity"
+    (new-identity "seed") => #"[a-z0-9]+")
+  (fact "identity should not be the seed"
+    (new-identity "seed") =not=> "seed")
+  (fact "seed should not result in the same identity"
+    (new-wallet "seed") =not=> (new-wallet "seed")))
+
+(defn new-wallet [id-seed]
+  (Wallet. (new-identity) {} {} (new-key-pair)))
 
 (facts "about new-wallet"
   (fact "should have a key"
-    (-> (new-wallet) :key) =not=> nil?)
+    (-> (new-wallet "seed") :key) =not=> nil?)
   (fact "should have a public key"
-    (-> (new-wallet) :key :public) =not=> nil?)
+    (-> (new-wallet "seed") :key :public) =not=> nil?)
   (fact "should have a private key"
-    (-> (new-wallet) :key :private) =not=> nil?)
+    (-> (new-wallet "seed") :key :private) =not=> nil?)
   (fact "should have an identity"
-    (-> (new-wallet) :identity) => #"[0-9a-f]+-[0-9a-f]+-[0-9a-f]+-[0-9a-f]+-[0-9a-f]+"))
+    (-> (new-wallet "seed") :identity) =not=> nil?))
 
 (defn uri [wallet]
   (str "/" (-> wallet :identity)))

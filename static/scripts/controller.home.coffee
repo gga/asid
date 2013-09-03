@@ -2,10 +2,13 @@ define ['page.home',
         'repository.wallet',
         'controller.wallet'], (homePage, walletRepo, walletController) ->
   start: () ->
-    homePage.onNewIdentity ->
-      walletRepo.create
-        ifSucceeded: (uri) ->
-          console.log(uri)
-          walletController.launch(uri)
+    homePage.onNewIdentity (idSeed) ->
+      if idSeed.length > 0
+        walletRepo.create idSeed,
+          ifSucceeded: (uri) ->
+            console.log(uri)
+            walletController.launch(uri)
 
-        elseFailed: ->
+          elseFailed: ->
+      else
+        homePage.render(error: "I'm going to need something from you to seed a unique identity.")

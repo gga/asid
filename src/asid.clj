@@ -20,15 +20,19 @@
 (defroutes main-routes
   (GET "/favicon.ico" [] "")
 
-  (POST "/identity" []
-        (let [new-id (wr/save wallet-repo (w/new-wallet))]
-          (created (w/uri new-id))))
+  (POST "/identity" [_ :as {body :body}]
+        (let [id-seed (slurp body)]
+          (if (= 0 (count id-seed))
+            (-> (response "Identity seed not supplied")
+                (status 400))
+            (let [new-id (wr/save wallet-repo (w/new-wallet id-seed))]
+              (created (w/uri new-id))))))
 
-  (GET ["/:id", :id #"([0-9a-f]+-){4,4}[0-9a-f]+"] [id]
+  (GET "/:id" [id]
        (-> (response (json/write-str (w/to-json (wr/get-wallet wallet-repo id))))
            (content-type "application/org.asidentity.wallet+json")))
 
-  (route/not-found (File. "resources/public/not-found.html")))
+  (route/not-found (File. "resources/public/not-found.html"))))
 
 (defn wrap-dir-index [handler]
   (fn [req]
@@ -54,8 +58,12 @@
   (:status (app (mr/request :get "/"))) => 200)
 
 (fact "/identity"
-  (let [req (app (mr/request :post "/identity"))]
+  (let [req (app (-> (mr/request :post "/identity")
+                     (mr/body "sample-id-seed")))]
     (:status req) => 201
-    (get (:headers req) "Location") => #"\/[a-z0-9-]+$"))
+    (get (:headers req) "Location") => #"\/[a-z0-9-]+$")
+  (let [req (app (-> (mr/request :post "/identity")
+                     (mr/body "")))]
+    (:status req) => 400))
 
 
