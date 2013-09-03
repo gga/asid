@@ -29,16 +29,31 @@
         (let [new-id (wr/save wallet-repo (w/new-wallet))]
           (created (w/uri new-id))))
 
-  (GET "/:id" [id]
+  (GET ["/:id", :id #"([0-9a-f]-){4,4}"] [id]
        (-> (response (json/write-str (w/to-json (wr/get-wallet wallet-repo id))))
            (content-type "application/org.asidentity.wallet+json")))
 
   (route/not-found (File. "resources/public/not-found.html")))
 
+(defn wrap-dir-index [handler]
+  (fn [req]
+    (handler
+     (update-in req [:uri] #(if (re-find #"/$" %)
+                              (str % "index.html")
+                              %)))))
+
+(fact
+  (let [wrapper (wrap-dir-index #(:uri %))]
+    (wrapper {:uri "/"}) => "/index.html"
+    (wrapper {:uri "/path/"}) => "/path/index.html"
+    (wrapper {:uri "/path/sub/"}) => "/path/sub/index.html"
+    (wrapper {:uri "/path"}) => "/path"))
+
 (def app
   (-> (handler/site main-routes)
       (wrap-resource "public")
-      (wrap-file-info)))
+      wrap-file-info
+      wrap-dir-index))
 
 (fact "/"
   (:status (app (mr/request :get "/"))) => 200)
