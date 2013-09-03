@@ -1,7 +1,10 @@
 (ns asid.wallet-repository
   (:require [clojurewerkz.neocons.rest :as nr]
             [clojurewerkz.neocons.rest.nodes :as nn]
-            [clojurewerkz.neocons.rest.relationships :as nrl]))
+            [clojurewerkz.neocons.rest.relationships :as nrl]
+            [clojurewerkz.neocons.rest.cypher :as cy])
+
+  (:import [asid.wallet Wallet]))
 
 (defn initialize! []
   (nr/connect! "http://localhost:7474/db/data/")
@@ -23,3 +26,26 @@
       (attach-to-node node data (get wallet data)))
     (nrl/create (:root ctxt) node :wallet)
     wallet))
+
+(defn sub-nodes [start type]
+  (map #(-> % :end nn/fetch-from)
+       (nrl/traverse (:id start) :relationships [{:direction "out" :type type}])))
+
+(defn wallet-from-node [node]
+  (let [bag-node (first (sub-nodes node :bag))
+        sig-node (first (sub-nodes node :signatures))
+        key-node (first (sub-nodes node :key))]
+    (Wallet. (-> node :data :identity) (:data bag-node) (:data sig-node) (:data key-node))))
+
+(defn get-wallet [ctxt id]
+  (-> (cy/tquery (str "START asid=node(1) "
+                      "MATCH asid-[:wallet]->wallet "
+                      "WHERE wallet.identity = {walletid} "
+                      "RETURN wallet")
+                 {:root (-> ctxt :root :id)
+                  :walletid id})
+      first
+      (get "wallet")
+      :self
+      nn/fetch-from
+      wallet-from-node))

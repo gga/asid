@@ -59,3 +59,15 @@
     (.initSign sig (private-key me) (SecureRandom.))
     (.update sig (.getBytes packet "UTF-8"))
     (to-hex (.sign sig))))
+
+(defn to-json [wallet]
+  {:identity (:identity wallet)
+   :bag (:bag wallet)
+   :signatures (:signatures wallet)
+   :key {:public (-> wallet :key :public)}})
+
+(fact
+  (let [tw (Wallet. "id" {} {} {:public "pub-key" :private "priv-key"})]
+    (to-json tw) => (contains {:identity "id"})
+    (to-json tw) => (contains {:key (contains {:public "pub-key"})})
+    {:key (to-json tw)} =not=> (contains {:private "priv-key"})))

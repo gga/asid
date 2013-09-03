@@ -7,6 +7,7 @@
 
   (:require [compojure.route :as route]
             [compojure.handler :as handler]
+            [clojure.data.json :as json]
             [net.cgrand.enlive-html :as enlive]
             [ring.mock.request :as mr])
 
@@ -26,8 +27,11 @@
 
   (POST "/identity" []
         (let [new-id (wr/save wallet-repo (w/new-wallet))]
-          (assoc (created (w/uri new-id))
-            :body new-id)))
+          (created (w/uri new-id))))
+
+  (GET "/:id" [id]
+       (-> (response (json/write-str (w/to-json (wr/get-wallet wallet-repo id))))
+           (content-type "application/org.asidentity.wallet+json")))
 
   (route/not-found (File. "resources/public/not-found.html")))
 
@@ -40,7 +44,8 @@
   (:status (app (mr/request :get "/"))) => 200)
 
 (fact "/identity"
-  (:status (app (mr/request :post "/identity"))) => 201
-  (get (:headers (app (mr/request :post "/identity"))) "Location") => #"\/[a-z0-9-]+$")
+  (let [req (app (mr/request :post "/identity"))]
+    (:status req) => 201
+    (get (:headers req) "Location") => #"\/[a-z0-9-]+$"))
 
 
