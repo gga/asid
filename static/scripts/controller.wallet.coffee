@@ -1,7 +1,13 @@
-define ['repository.wallet'], (walletRepo) ->
+define ['repository.wallet',
+        'store',
+        'navigator'], (walletRepo, store, navigator) ->
 
-  start: (walletUri) ->
-    walletRepo.get walletUri,
+  launch: (walletUri) ->
+    store.set('currentWalletUri', walletUri)
+    navigator.changePage('/wallet/')
+
+  start: () ->
+    walletRepo.get store.get('currentWalletUri'),
       ifSucceeded: (data) ->
         console.log(data)
       elseFailed: () ->

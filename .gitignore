@@ -3,5 +3,4 @@
 /resources/public/stylesheets/*.css
 /resources/public/*.html
 /resources/public/scripts/*.js
-/src/*.html
 /resources/public/**/*.html

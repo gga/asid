@@ -4,7 +4,6 @@ namespace :build do
 
   task :haml
 
-  Dir['src/**/*.haml'].each { |tmpl| task :haml => haml_template(tmpl, output: File.dirname(tmpl)) }
   Dir['static/pages/**/*.haml'].each do |tmpl|
     task :haml => haml_template(tmpl, output: tmpl.pathmap("%{static,resources;pages,public}d"))
   end

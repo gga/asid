@@ -6,6 +6,6 @@ define ['page.home',
       walletRepo.create
         ifSucceeded: (uri) ->
           console.log(uri)
-          walletController.start(uri)
+          walletController.launch(uri)
 
         elseFailed: ->

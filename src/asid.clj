@@ -8,7 +8,6 @@
   (:require [compojure.route :as route]
             [compojure.handler :as handler]
             [clojure.data.json :as json]
-            [net.cgrand.enlive-html :as enlive]
             [ring.mock.request :as mr])
 
   (:require [asid.wallet :as w]
@@ -16,20 +15,16 @@
 
   (:import java.io.File))
 
-(enlive/deftemplate home "home.html" [])
-
 (def wallet-repo (wr/initialize!))
 
 (defroutes main-routes
   (GET "/favicon.ico" [] "")
 
-  (GET "/" [] (apply str (home)))
-
   (POST "/identity" []
         (let [new-id (wr/save wallet-repo (w/new-wallet))]
           (created (w/uri new-id))))
 
-  (GET ["/:id", :id #"([0-9a-f]-){4,4}"] [id]
+  (GET ["/:id", :id #"([0-9a-f]+-){4,4}[0-9a-f]+"] [id]
        (-> (response (json/write-str (w/to-json (wr/get-wallet wallet-repo id))))
            (content-type "application/org.asidentity.wallet+json")))
 
