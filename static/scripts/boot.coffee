@@ -1,5 +1,5 @@
 require.config
-  baseUrl: 'scripts',
+  baseUrl: '/scripts',
   paths:
     jquery: 'jquery-2.0.3.min'
 
