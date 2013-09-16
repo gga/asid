@@ -35,4 +35,10 @@
         %h2 Data
         .bag
           .controls
+            %form#addBagItem
+              %label(for="key") Key:
+              %input#newKey(type="text" name="key")
+              %label(for="value") Value:
+              %input#newValue(type="text" name="value")
+              %input(type="submit" value="Add")
           .entries
