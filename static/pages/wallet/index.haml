@@ -9,7 +9,20 @@
 
     %script#walletTmpl(type="text/html")
       %h3 {{ identity }}
-      %code {{ key.public }}
+      %code {{ publicKey }}
+
+    %script#bagTmpl(type="text/html")
+      %table
+        %thead
+          %tr
+            %th Key
+            %th Value
+        %tbody
+          {{#bag}}
+          %tr
+            %td {{key}}
+            %td {{value}}
+          {{/bag}}
 
   %body
     .container
@@ -18,3 +31,8 @@
 
       .content
         .wallet
+          
+        %h2 Data
+        .bag
+          .controls
+          .entries
