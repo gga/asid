@@ -3,6 +3,7 @@
         ring.middleware.resource
         ring.middleware.file-info
         ring.util.response
+        ring.adapter.jetty
         midje.sweet)
 
   (:require [compojure.route :as route]
@@ -30,18 +31,17 @@
               (created (w/uri new-id))))))
 
   (GET ["/:id", :id w/wallet-identity-grammar] [id :as {accepts :accepts}]
-       (let [wallet-content-handlers
-             {"text/html"
-              (fn [id]
-                (File. "resources/public/wallet/index.html"))
-              "application/vnd.org.asidentity.wallet+json"
-              (fn [id]
-                (-> (response (json/write-str (w/to-json (wr/get-wallet wallet-repo id))))
-                    (content-type "application/vnd.org.asidentity.wallet+json")))}
-             handler (first (remove nil? (map wallet-content-handlers accepts)))]
-         (handler id)))
+       (let [wallet-json (json/write-str (w/to-json (wr/get-wallet wallet-repo id)))
+             content-handlers {"text/html" (fn [_] (File. "resources/public/wallet/index.html"))
+              
+                               "application/vnd.org.asidentity.wallet+json"
+                               (fn [content] (-> (response content)
+                                                 (content-type "application/vnd.org.asidentity.wallet+json")))}
 
-  (route/not-found (File. "resources/public/not-found.html"))))
+             handler (first (remove nil? (map content-handlers accepts)))]
+         (handler wallet-json)))
+
+  (route/not-found (File. "resources/public/not-found.html")))
 
 (defn wrap-dir-index [handler]
   (fn [req]
@@ -69,9 +69,13 @@
     (wrapper (mr/header req "Accept" "text/html")) => ["text/html"]
     (wrapper (mr/header req "Accept" "text/html, */*")) => ["text/html" "*/*"]))
 
+(defn- wrap-vary [handler]
+  #(header (handler %) "Vary" "Accept"))
+
 (def app
   (-> (handler/site main-routes)
       wrap-accept
+      wrap-vary
       (wrap-resource "public")
       wrap-file-info
       wrap-dir-index))
@@ -89,9 +93,10 @@
     (:status req) => 400))
 
 (fact "/<wallet-id>"
-  (let [wallet (w/new-wallet "seed")
+  (let [wallet (wr/save wallet-repo (w/new-wallet "seed"))
         req (app (-> (mr/request :get (w/uri wallet))
                      (mr/header "Accept" "text/html, application/xml")))]
     (:status req) => 200))
 
-
+(defn start-asid []
+  (run-jetty #'asid/app {:port 8888 :join? false}))
