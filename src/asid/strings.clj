@@ -15,6 +15,3 @@
 (facts "from-hex"
   (seq (from-hex "ICAg")) => (seq (bytes (byte-array (map (comp byte int) "   "))))
   (seq (from-hex (to-hex (.getBytes "hello, world!")))) => (seq (bytes (byte-array (map (comp byte int) "hello, world!")))))
-
-(defn uuid []
-  (str (java.util.UUID/randomUUID)))

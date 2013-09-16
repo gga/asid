@@ -54,7 +54,7 @@
   (fact "identity should not be the seed"
     (new-identity "seed") =not=> "seed")
   (fact "seed should not result in the same identity"
-    (new-wallet "seed") =not=> (new-wallet "seed")))
+    (new-identity "seed") =not=> (new-identity "seed")))
 
 (defn new-wallet [id-seed]
   (Wallet. (new-identity id-seed) {} {} (new-key-pair)))
