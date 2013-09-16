@@ -4,7 +4,7 @@
                  [org.clojure/data.codec "0.1.0"]
                  [org.clojure/data.json "0.2.2"]
                  [compojure "1.1.5"]
-                 [enlive "1.1.1"]
+                 [enlive "1.1.4"]
                  [ring/ring-core "1.2.0"]
                  [ring/ring-jetty-adapter "1.2.0"]
                  [bouncycastle/bcprov-jdk16 "140"]
