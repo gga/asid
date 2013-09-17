@@ -19,3 +19,11 @@ define ['jquery'], ($) ->
         Accept: 'application/vnd.org.asidentity.wallet+json'
       success: (wallet) -> opts.ifSucceeded(wallet)
       error: -> opts.elseFailed()
+
+  addBagItem: (bagUri, key, value, opts) ->
+    $.ajax bagUri,
+      type: 'POST'
+      data:
+        key: key
+        value: value
+      success: (wallet) -> opts.ifSucceeded(wallet)

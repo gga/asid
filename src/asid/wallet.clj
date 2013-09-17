@@ -75,6 +75,9 @@
 (fact
   (uri (Wallet. "fake-id" {} {} (new-key-pair))) => "/fake-id")
 
+(defn bag-uri [wallet]
+  (str (uri wallet) "/bag"))
+
 (defn private-key [wallet]
   (let [factory (KeyFactory/getInstance "ECDSA" "BC")]
     (.generatePrivate factory (PKCS8EncodedKeySpec. (from-hex (-> wallet :key :private))))))
@@ -90,14 +93,30 @@
     (.update sig (.getBytes packet "UTF-8"))
     (to-hex (.sign sig))))
 
+(defn add-data [wallet key value]
+  (assoc (Wallet. (:identity wallet)
+                  (assoc (:bag wallet) key value)
+                  (:signatures wallet)
+                  (:key wallet))
+    :node-id (:node-id wallet)))
+
+(fact
+  (let [orig (new-wallet "id")
+        added (add-data orig :item "value")]
+    (-> added :bag :item) => "value"
+    (-> added :identity) => (-> orig :identity)
+    (-> added :key :public) => (-> orig :key :public)))
+
 (defn to-json [wallet]
   {:identity (:identity wallet)
    :bag (:bag wallet)
    :signatures (:signatures wallet)
-   :key {:public (-> wallet :key :public)}})
+   :key {:public (-> wallet :key :public)}
+   :links {:bag (bag-uri wallet)}})
 
 (fact
   (let [tw (Wallet. "id" {} {} {:public "pub-key" :private "priv-key"})]
     (to-json tw) => (contains {:identity "id"})
     (to-json tw) => (contains {:key (contains {:public "pub-key"})})
-    {:key (to-json tw)} =not=> (contains {:private "priv-key"})))
+    (:key (to-json tw)) =not=> (contains {:private "priv-key"})
+    (:links (to-json tw)) => (contains {:bag "/id/bag"})))

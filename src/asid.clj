@@ -41,6 +41,15 @@
              handler (first (remove nil? (map content-handlers accepts)))]
          (handler wallet-json)))
 
+  (POST ["/:id/bag", :id w/wallet-identity-grammar] [id key value]
+        (let [wallet (wr/get-wallet wallet-repo id)]
+          (if (or (= 0 (count key))
+                  (= 0 (count value)))
+            (-> (response "Either key or value or both not supplied.")
+                (status 400))
+            (-> (response (json/write-str (w/to-json (wr/save wallet-repo (w/add-data wallet key value)))))
+                (content-type "application/vnd.org.asidentity.wallet+json")))))
+
   (route/not-found (File. "resources/public/not-found.html")))
 
 (defn wrap-dir-index [handler]
@@ -96,6 +105,11 @@
   (let [wallet (wr/save wallet-repo (w/new-wallet "seed"))
         req (app (-> (mr/request :get (w/uri wallet))
                      (mr/header "Accept" "text/html, application/xml")))]
+    (:status req) => 200))
+
+(fact "/<wallet-id>/bag"
+  (let [wallet (wr/save wallet-repo (w/new-wallet "seed"))
+        req (app (mr/request :post (w/bag-uri wallet) {"key" "key1" "value" "new-value"}))]
     (:status req) => 200))
 
 (defn start-asid []
