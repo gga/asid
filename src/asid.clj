@@ -3,17 +3,17 @@
         ring.middleware.resource
         ring.middleware.file-info
         ring.util.response
-        ring.adapter.jetty
         midje.sweet)
 
   (:require [compojure.route :as route]
             [compojure.handler :as handler]
             [clojure.data.json :as json]
-            [clojure.string :as cs]
             [ring.mock.request :as mr])
 
   (:require [asid.wallet :as w]
-            [asid.wallet-repository :as wr])
+            [asid.wallet-repository :as wr]
+            [asid.content-negotiation :as acn]
+            [asid.static :as as])
 
   (:import java.io.File))
 
@@ -52,42 +52,13 @@
 
   (route/not-found (File. "resources/public/not-found.html")))
 
-(defn wrap-dir-index [handler]
-  (fn [req]
-    (handler
-     (update-in req [:uri] #(if (re-find #"/$" %)
-                              (str % "index.html")
-                              %)))))
-
-(fact
-  (let [wrapper (wrap-dir-index #(:uri %))]
-    (wrapper {:uri "/"}) => "/index.html"
-    (wrapper {:uri "/path/"}) => "/path/index.html"
-    (wrapper {:uri "/path/sub/"}) => "/path/sub/index.html"
-    (wrapper {:uri "/path"}) => "/path"))
-
-(defn- wrap-accept [handler]
-  (fn [req]
-    (handler (assoc req :accepts
-                    (map cs/trim (cs/split (-> req :headers (get "accept" "*/*"))
-                                           #","))))))
-
-(fact
-  (let [wrapper (wrap-accept #(:accepts %))
-        req (mr/request :get "body")]
-    (wrapper (mr/header req "Accept" "text/html")) => ["text/html"]
-    (wrapper (mr/header req "Accept" "text/html, */*")) => ["text/html" "*/*"]))
-
-(defn- wrap-vary [handler]
-  #(header (handler %) "Vary" "Accept"))
-
 (def app
   (-> (handler/site main-routes)
-      wrap-accept
-      wrap-vary
+      acn/accepts
+      acn/vary-by-accept
       (wrap-resource "public")
       wrap-file-info
-      wrap-dir-index))
+      as/static-dir-index))
 
 (fact "/"
   (:status (app (mr/request :get "/"))) => 200)
@@ -111,6 +82,3 @@
   (let [wallet (wr/save wallet-repo (w/new-wallet "seed"))
         req (app (mr/request :post (w/bag-uri wallet) {"key" "key1" "value" "new-value"}))]
     (:status req) => 200))
-
-(defn start-asid []
-  (run-jetty #'asid/app {:port 8888 :join? false}))
