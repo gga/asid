@@ -3,12 +3,11 @@
   (:use asid.strings)
 
   (:require [clojure.data.json :as json]
-            [clojure.string :as cs])
+            [asid.identity :as aid])
 
   (:import [org.bouncycastle.jce.provider BouncyCastleProvider]
-           [java.security KeyFactory Security KeyPairGenerator SecureRandom Signature MessageDigest]
+           [java.security KeyFactory Security KeyPairGenerator SecureRandom Signature]
            [java.security.spec ECGenParameterSpec PKCS8EncodedKeySpec]))
-
 
 (defn new-key-pair []
   (Security/addProvider (BouncyCastleProvider.))
@@ -27,37 +26,8 @@
 
 (defrecord Wallet [identity bag signatures key])
 
-(defn- salt [length]
-  (let [rand (SecureRandom/getInstance "SHA1PRNG")
-        salt-bytes (make-array Byte/TYPE length)]
-    (.nextBytes rand salt-bytes)
-    salt-bytes))
-
-(defn- sha [message salt]
-  (apply str
-         (map (partial format "%02x")
-              (.digest (doto (MessageDigest/getInstance "SHA-1")
-                         .reset
-                         (.update (byte-array (mapcat seq [(.getBytes message) salt]))))))))
-
-(def wallet-identity-grammar #"([a-f0-9]{4,4}-)+[a-f0-9]{1,4}")
-
-(defn- new-identity [id-seed]
-  (cs/join "-" (map (partial apply str)
-                    (partition 4 (sha id-seed (salt 20))))))
-
-(facts "about new-identity"
-  (fact "should generate an alpha-numeric string as the identity"
-    (new-identity "seed") => #"[a-z0-9-]+")
-  (fact "an identity should be easy to read"
-    (new-identity "seed") => wallet-identity-grammar)
-  (fact "identity should not be the seed"
-    (new-identity "seed") =not=> "seed")
-  (fact "seed should not result in the same identity"
-    (new-identity "seed") =not=> (new-identity "seed")))
-
 (defn new-wallet [id-seed]
-  (Wallet. (new-identity id-seed) {} {} (new-key-pair)))
+  (Wallet. (aid/new-identity id-seed) {} {} (new-key-pair)))
 
 (facts "about new-wallet"
   (fact "should have a key"

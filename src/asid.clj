@@ -11,6 +11,7 @@
             [ring.mock.request :as mr])
 
   (:require [asid.wallet :as w]
+            [asid.identity :as aid]
             [asid.wallet-repository :as wr]
             [asid.content-negotiation :as acn]
             [asid.static :as as])
@@ -30,7 +31,7 @@
             (let [new-id (wr/save wallet-repo (w/new-wallet id-seed))]
               (created (w/uri new-id))))))
 
-  (GET ["/:id", :id w/wallet-identity-grammar] [id :as {accepts :accepts}]
+  (GET ["/:id", :id aid/grammar] [id :as {accepts :accepts}]
        (let [wallet-json (json/write-str (w/to-json (wr/get-wallet wallet-repo id)))
              content-handlers {"text/html" (fn [_] (File. "resources/public/wallet/index.html"))
               
@@ -41,7 +42,7 @@
              handler (first (remove nil? (map content-handlers accepts)))]
          (handler wallet-json)))
 
-  (POST ["/:id/bag", :id w/wallet-identity-grammar] [id key value]
+  (POST ["/:id/bag", :id aid/grammar] [id key value]
         (let [wallet (wr/get-wallet wallet-repo id)]
           (if (or (= 0 (count key))
                   (= 0 (count value)))
