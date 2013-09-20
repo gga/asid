@@ -13,7 +13,7 @@
   (Security/addProvider (BouncyCastleProvider.))
   (let [ecGenSpec (ECGenParameterSpec. "prime192v1")
         keyGen (KeyPairGenerator/getInstance "ECDSA" "BC")]
-    (.initialize keyGen ecGenSpec (SecureRandom.))
+    (.initialize keyGen ecGenSpec (SecureRandom/getInstance "SHA1PRNG"))
     (let [pair (.generateKeyPair keyGen)]
       {:public (to-hex (-> pair .getPublic .getEncoded))
        :private (to-hex (-> pair .getPrivate .getEncoded))})))
