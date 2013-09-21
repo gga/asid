@@ -8,17 +8,21 @@
   (:require [compojure.route :as route]
             [compojure.handler :as handler]
             [clojure.data.json :as json]
+            [clojure.string :as cs]
             [ring.mock.request :as mr])
 
-  (:require [asid.wallet :as w]
+  (:require [asid.neo :as an]
+            [asid.wallet :as w]
             [asid.identity :as aid]
             [asid.wallet-repository :as wr]
             [asid.content-negotiation :as acn]
-            [asid.static :as as])
+            [asid.static :as as]
+            [asid.trust-pool :as tp]
+            [asid.trust-pool-repository :as tpr])
 
   (:import java.io.File))
 
-(def wallet-repo (wr/initialize!))
+(def repo (an/initialize!))
 
 (defroutes main-routes
   (GET "/favicon.ico" [] "")
@@ -28,11 +32,11 @@
           (if (= 0 (count id-seed))
             (-> (response "Identity seed not supplied")
                 (status 400))
-            (let [new-id (wr/save wallet-repo (w/new-wallet id-seed))]
+            (let [new-id (wr/save repo (w/new-wallet id-seed))]
               (created (w/uri new-id))))))
 
   (GET ["/:id", :id aid/grammar] [id :as {accepts :accepts}]
-       (let [wallet-json (json/write-str (w/to-json (wr/get-wallet wallet-repo id)))
+       (let [wallet-json (json/write-str (w/to-json (wr/get-wallet repo id)))
              content-handlers {"text/html" (fn [_] (File. "resources/public/wallet/index.html"))
               
                                "application/vnd.org.asidentity.wallet+json"
@@ -43,13 +47,25 @@
          (handler wallet-json)))
 
   (POST ["/:id/bag", :id aid/grammar] [id key value]
-        (let [wallet (wr/get-wallet wallet-repo id)]
+        (let [wallet (wr/get-wallet repo id)]
           (if (or (= 0 (count key))
                   (= 0 (count value)))
             (-> (response "Either key or value or both not supplied.")
                 (status 400))
-            (-> (response (json/write-str (w/to-json (wr/save wallet-repo (w/add-data wallet key value)))))
+            (-> (response (json/write-str (w/to-json (wr/save repo (w/add-data wallet key value)))))
                 (content-type "application/vnd.org.asidentity.wallet+json")))))
+
+  (POST ["/:id/trustpool", :id aid/grammar] [id name challenge]
+        (let [wallet (wr/get-wallet repo id)]
+          (if (= 0 (count name))
+            (-> (response "A name must be provided.")
+                (status 400))
+            (let [challenge-keys (map cs/trim (cs/split challenge #","))
+                  pool (tpr/save repo (tp/new-trust-pool name challenge-keys))]
+              (an/connect-nodes wallet pool)
+              (-> (response (json/write-str (tp/to-json pool)))
+                  (content-type "application/vnd.org.asidentity.trust-pool+json")
+                  (header "Location" (tp/uri pool)))))))
 
   (route/not-found (File. "resources/public/not-found.html")))
 
@@ -74,12 +90,12 @@
     (:status req) => 400))
 
 (fact "/<wallet-id>"
-  (let [wallet (wr/save wallet-repo (w/new-wallet "seed"))
+  (let [wallet (wr/save repo (w/new-wallet "seed"))
         req (app (-> (mr/request :get (w/uri wallet))
                      (mr/header "Accept" "text/html, application/xml")))]
     (:status req) => 200))
 
 (fact "/<wallet-id>/bag"
-  (let [wallet (wr/save wallet-repo (w/new-wallet "seed"))
+  (let [wallet (wr/save repo (w/new-wallet "seed"))
         req (app (mr/request :post (w/bag-uri wallet) {"key" "key1" "value" "new-value"}))]
     (:status req) => 200))
