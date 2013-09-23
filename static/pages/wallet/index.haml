@@ -24,6 +24,10 @@
             %td {{value}}
           {{/bag}}
 
+    %script#challengeTmpl(type="text/html")
+      %div
+        %input.challengeEntry(type="text")
+
   %body
     .container
       .header
@@ -42,3 +46,13 @@
               %input#newValue(type="text" name="value")
               %input(type="submit" value="Add")
           .entries
+
+        %h2 Trust Pools
+        .pools
+          .controls
+            %form#addTrustPool
+              %label(for="name") Name:
+              %input#poolName(type="text" name="name")
+              %input(type="submit" value="New Pool")
+              .challenge
+              %a#addChallenge(href="#") Another&hellip;

@@ -1,14 +1,16 @@
 define ['underscore',
         'repository.wallet',
+        'repository.trustPool',
         'page.myWallet',
         'store',
-        'navigator'], (_, walletRepo, myWalletPage, store, navigator) ->
+        'navigator'], (_, walletRepo, trustPoolRepo, myWalletPage, store, navigator) ->
   currentWallet = null
 
   presentWallet = (wallet) ->
-    identity: wallet.identity
-    publicKey: wallet.key.public
-    bag: _.map(_.keys(wallet.bag), (k) -> key: k, value: wallet.bag[k])
+    wallet:
+      identity: wallet.identity
+      publicKey: wallet.key.public
+      bag: _.map(_.keys(wallet.bag), (k) -> key: k, value: wallet.bag[k])
 
   displayCurrentWallet = () ->
     myWalletPage.render(presentWallet(currentWallet))
@@ -18,6 +20,14 @@ define ['underscore',
       ifSucceeded: (updatedWallet) ->
         currentWallet = updatedWallet
         displayCurrentWallet()
+
+  myWalletPage.onAddChallenge(() -> myWalletPage.render(addChallengeLine: true))
+
+  myWalletPage.onAddTrustPool (poolName, challenge) ->
+    trustPoolRepo.create currentWallet, poolName, challenge,
+      ifSucceeded: (poolUri, pool) ->
+      elseFailed: () ->
+        console.log("Error! Couldn't create trust pool.")
 
   launch: (walletUri) ->
     store.set('currentWalletUri', walletUri)

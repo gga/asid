@@ -48,6 +48,9 @@
 (defn bag-uri [wallet]
   (str (uri wallet) "/bag"))
 
+(defn trustpool-uri [wallet]
+  (str (uri wallet) "/trustpool"))
+
 (defn private-key [wallet]
   (let [factory (KeyFactory/getInstance "ECDSA" "BC")]
     (.generatePrivate factory (PKCS8EncodedKeySpec. (from-hex (-> wallet :key :private))))))
@@ -82,11 +85,13 @@
    :bag (:bag wallet)
    :signatures (:signatures wallet)
    :key {:public (-> wallet :key :public)}
-   :links {:bag (bag-uri wallet)}})
+   :links {:bag (bag-uri wallet)
+           :trustpool (trustpool-uri wallet)}})
 
 (fact
   (let [tw (Wallet. "id" {} {} {:public "pub-key" :private "priv-key"})]
     (to-json tw) => (contains {:identity "id"})
     (to-json tw) => (contains {:key (contains {:public "pub-key"})})
     (:key (to-json tw)) =not=> (contains {:private "priv-key"})
-    (:links (to-json tw)) => (contains {:bag "/id/bag"})))
+    (:links (to-json tw)) => (contains {:bag "/id/bag"})
+    (:links (to-json tw)) => (contains {:trustpool "/id/trustpool"})))
