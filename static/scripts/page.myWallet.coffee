@@ -3,7 +3,13 @@ define ['jquery', 'underscore'], ($, _) ->
   insertChallengeLine = () ->
     $('form#addTrustPool .challenge').append(ich.challengeTmpl())
 
-  insertChallengeLine()
+  clear = () ->
+    $('input#newKey').val('')
+    $('input#newValue').val('')
+    $('form#addTrustPool .challenge').empty()
+    insertChallengeLine()
+
+  clear()
 
   onAddBagItem: (handler) ->
     $('form#addBagItem').on 'submit', (e) ->
@@ -26,3 +32,8 @@ define ['jquery', 'underscore'], ($, _) ->
       $('.bag .entries').html(ich.bagTmpl(viewMsg.wallet))
     if _.has(viewMsg, 'addChallengeLine')
       insertChallengeLine()
+    if _.has(viewMsg, 'trustPools')
+      console.log(viewMsg)
+      $('.pools .entries').html(ich.trustPoolsTmpl(viewMsg))
+    if _.has(viewMsg, 'reset')
+      clear()

@@ -20,12 +20,15 @@ define ['underscore',
       ifSucceeded: (updatedWallet) ->
         currentWallet = updatedWallet
         displayCurrentWallet()
+        myWalletPage.render(reset: true)
 
   myWalletPage.onAddChallenge(() -> myWalletPage.render(addChallengeLine: true))
 
   myWalletPage.onAddTrustPool (poolName, challenge) ->
     trustPoolRepo.create currentWallet, poolName, challenge,
       ifSucceeded: (poolUri, pool) ->
+        myWalletPage.render(trustPools: [pool])
+        myWalletPage.render(reset: true)
       elseFailed: () ->
         console.log("Error! Couldn't create trust pool.")
 

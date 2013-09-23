@@ -28,6 +28,16 @@
       %div
         %input.challengeEntry(type="text")
 
+    %script#trustPoolsTmpl(type="text/html")
+      {{#trustPools}}
+      %h3 {{ name }}
+      %code {{ identity }}
+      %ol
+        {{#challenge}}
+        %li {{.}}
+        {{/challenge}}
+      {{/trustPools}}
+
   %body
     .container
       .header
@@ -56,3 +66,4 @@
               %input(type="submit" value="New Pool")
               .challenge
               %a#addChallenge(href="#") Another&hellip;
+          .entries
