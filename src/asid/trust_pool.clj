@@ -14,8 +14,8 @@
    :identity (:identity pool)
    :challenge (:challenge pool)})
 
-(defn uri [pool]
-  (str "/pool/" (:identity pool)))
+(defn uri [wallet pool]
+  (str (w/uri wallet) "/trustpool/" (:identity pool)))
 
 (defrecord Origin [identity url])
 (defrecord Trustee [signed-values origin])

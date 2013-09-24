@@ -20,7 +20,17 @@
   (let [data-node (nn/create data)]
         (nrl/create node data-node link)))
 
+(defn sub-nodes [start type]
+  (remove nil? (map #(if-let [end-node (-> % :end)]
+                       (nn/fetch-from end-node)
+                       nil)
+                    (nrl/traverse (:id start)
+                                  :relationships [{:direction "out" :type type}]))))
+
 (defn sub-node [start type]
-  (first (map #(-> % :end nn/fetch-from)
-              (nrl/traverse (:id start)
-                            :relationships [{:direction "out" :type type}]))))
+  (first (sub-nodes start type)))
+
+(defn sub-objects [start type]
+  (if-let [node-id (:node-id start)]
+    (map :data (sub-nodes {:id node-id} type))
+    []))

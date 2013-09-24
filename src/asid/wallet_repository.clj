@@ -6,6 +6,16 @@
 
   (:import [asid.wallet Wallet]))
 
+(defn wallet-from-node [node]
+  (let [bag-node (an/sub-node node :bag)
+        sig-node (an/sub-node node :signatures)
+        key-node (an/sub-node node :key)]
+    (assoc (Wallet. (-> node :data :identity)
+                    (:data bag-node)
+                    (:data sig-node)
+                    (:data key-node))
+      :node-id (:id node))))
+
 (defn- update [wallet]
   (nn/update (:node-id wallet) {:identity (:identity wallet)})
   (let [wallet-node (nn/get (:node-id wallet))
@@ -24,16 +34,6 @@
         (an/attach-to-node node data (get wallet data)))
       (nrl/create (:root ctxt) node :wallet)
       wallet)))
-
-(defn wallet-from-node [node]
-  (let [bag-node (an/sub-node node :bag)
-        sig-node (an/sub-node node :signatures)
-        key-node (an/sub-node node :key)]
-    (assoc (Wallet. (-> node :data :identity)
-                    (:data bag-node)
-                    (:data sig-node)
-                    (:data key-node))
-      :node-id (:id node))))
 
 (defn get-wallet [ctxt id]
   (-> (cy/tquery (str "START asid=node(1) "

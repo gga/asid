@@ -67,8 +67,14 @@
               (an/connect-nodes wallet pool :trustpool)
               (-> (response (json/write-str (tp/to-json pool)))
                   (content-type "application/vnd.org.asidentity.trust-pool+json")
-                  (header "Location" (tp/uri pool))
+                  (header "Location" (tp/uri wallet pool))
                   (status 201))))))
+
+  (GET ["/:walletid/trustpool/:poolid", :walletid aid/grammar :poolid aid/grammar] [walletid poolid]
+       (let [wallet (wr/get-wallet repo walletid)
+             pool (tpr/pool-from-wallet wallet poolid)]
+         (-> (response (json/write-str (tp/to-json pool)))
+             (content-type "application/vnd.org.asidentity.trust-pool+json"))))
 
   (route/not-found (File. "resources/public/not-found.html")))
 
