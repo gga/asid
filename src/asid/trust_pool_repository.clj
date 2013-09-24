@@ -10,13 +10,13 @@
   (let [node (nn/create {:identity (:identity pool)
                          :name (:name pool)
                          :challenge (:challenge pool)})]
-    (assoc pool :node-id (:id node))))
+    (conj pool [:node-id (:id node)])))
 
 (defn pool-from-node [node]
-  (assoc (TrustPool. (-> node :data :name)
-                     (-> node :data :identity)
-                     (-> node :data :challenge))
-    :node-id (:id node)))
+  (conj (TrustPool. (-> node :data :name)
+                    (-> node :data :identity)
+                    (-> node :data :challenge))
+        [:node-id (:id node)]))
 
 (defn pool-from-wallet [wallet poolid]
   (-> (cy/tquery (str "START wallet=node({walletnode}) "

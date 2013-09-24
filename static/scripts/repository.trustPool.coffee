@@ -13,3 +13,13 @@ define ['jquery'], ($) ->
         else
           opts.elseFailed()
       error: -> opts.elseFailed()
+
+  get: (tpUri, opts) ->
+    $.ajax tpUri,
+      type: 'GET'
+      headers:
+        Accept: 'application/vnd.org.asidentity.trust-pool+json'
+      success: (pool) ->
+        opts.ifSucceeded(pool) if opts.ifSucceeded?
+      error: () ->
+        opts.elseFailed() if opts.elseFailed?

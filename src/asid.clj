@@ -70,7 +70,7 @@
                   (header "Location" (tp/uri wallet pool))
                   (status 201))))))
 
-  (GET ["/:walletid/trustpool/:poolid", :walletid aid/grammar :poolid aid/grammar] [walletid poolid]
+  (GET "/:walletid/trustpool/:poolid" [walletid poolid]
        (let [wallet (wr/get-wallet repo walletid)
              pool (tpr/pool-from-wallet wallet poolid)]
          (-> (response (json/write-str (tp/to-json pool)))
@@ -114,3 +114,11 @@
         req (app (-> (mr/request :post (w/trustpool-uri wallet)
                                  (json/write-str {:name "hello" :challenge ["name"]}))))]
     (:status req) => 201))
+
+(fact "/<wallet-id>/trustpool/<pool-id>"
+  (let [wallet (wr/save repo (w/new-wallet "seed"))
+        pool (tpr/save repo (tp/new-trust-pool "pool" ["name" "dob"]))]
+    (an/connect-nodes wallet pool :trustpool)
+    (let [req (app (-> (mr/request :get (tp/uri wallet pool))
+                       (mr/header "Accept" "application/vnd.org.asidentity.trust-pool+json")))]
+      (:status req) => 200)))

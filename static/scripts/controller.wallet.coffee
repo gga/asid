@@ -14,6 +14,10 @@ define ['underscore',
 
   displayCurrentWallet = () ->
     myWalletPage.render(presentWallet(currentWallet))
+    _.each currentWallet.links.trustpools, (tpUri) ->
+      trustPoolRepo.get tpUri,
+        ifSucceeded: (pool) ->
+          myWalletPage.render(addTrustPool: pool)
 
   myWalletPage.onAddBagItem (key, value) ->
     walletRepo.addBagItem currentWallet.links.bag, key, value,
@@ -27,7 +31,7 @@ define ['underscore',
   myWalletPage.onAddTrustPool (poolName, challenge) ->
     trustPoolRepo.create currentWallet, poolName, challenge,
       ifSucceeded: (poolUri, pool) ->
-        myWalletPage.render(trustPools: [pool])
+        myWalletPage.render(addTrustPool: pool)
         myWalletPage.render(reset: true)
       elseFailed: () ->
         console.log("Error! Couldn't create trust pool.")

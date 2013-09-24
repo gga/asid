@@ -29,14 +29,12 @@
         %input.challengeEntry(type="text")
 
     %script#trustPoolsTmpl(type="text/html")
-      {{#trustPools}}
       %h3 {{ name }}
       %code {{ identity }}
       %ol
         {{#challenge}}
         %li {{.}}
         {{/challenge}}
-      {{/trustPools}}
 
   %body
     .container

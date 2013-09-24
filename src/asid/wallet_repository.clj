@@ -33,10 +33,10 @@
       (doseq [data [:bag :signatures :key]]
         (an/attach-to-node node data (get wallet data)))
       (nrl/create (:root ctxt) node :wallet)
-      wallet)))
+      (conj wallet [:node-id (:id node)]))))
 
 (defn get-wallet [ctxt id]
-  (-> (cy/tquery (str "START asid=node(1) "
+  (-> (cy/tquery (str "START asid=node({root}) "
                       "MATCH asid-[:wallet]->wallet "
                       "WHERE wallet.identity = {walletid} "
                       "RETURN wallet")
