@@ -13,6 +13,7 @@
 
   (:require [asid.neo :as an]
             [asid.wallet :as w]
+            [asid.wallet.render :as wrender]
             [asid.identity :as aid]
             [asid.wallet-repository :as wr]
             [asid.content-negotiation :as acn]
@@ -37,7 +38,7 @@
               (created (w/uri new-id))))))
 
   (GET ["/:id", :id aid/grammar] [id :as {accepts :accepts}]
-       (let [wallet-json (w/to-json (wr/get-wallet repo id))
+       (let [wallet-json (wrender/to-json (wr/get-wallet repo id))
              content-handlers {"text/html" (fn [_] (File. "resources/public/wallet/index.html"))
               
                                "application/vnd.org.asidentity.wallet+json"
@@ -53,7 +54,7 @@
                   (= 0 (count value)))
             (-> (response "Either key or value or both not supplied.")
                 (status 400))
-            (-> (response (w/to-json (wr/save repo (w/add-data wallet key value))))
+            (-> (response (wrender/to-json (wr/save repo (w/add-data wallet key value))))
                 (content-type "application/vnd.org.asidentity.wallet+json")))))
 
   (POST ["/:id/trustpool", :id aid/grammar] [id :as {pool-doc :json-doc}]

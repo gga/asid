@@ -10,20 +10,6 @@
 (defn new-trust-pool [name req-keys]
   (TrustPool. name (aid/new-identity name) req-keys))
 
-(defn self-link [so-far pool]
-  (conj so-far [:self (uri (an/parent-object pool :trustpool)
-                           pool)]))
-
-(defn links [pool]
-  (-> {}
-      (self-link pool)))
-
-(defn to-json [pool]
-  {:name (:name pool)
-   :identity (:identity pool)
-   :challenge (:challenge pool)
-   :links (links pool)})
-
 (defn uri [wallet pool]
   (str (w/uri wallet) "/trustpool/" (:identity pool)))
 
@@ -41,3 +27,17 @@
                (w/new-wallet "id seed")
                {:identity "id" :url "url"}
                "blah") =not=> nil?)
+
+(defn self-link [so-far pool]
+  (conj so-far [:self (uri (an/parent-object pool :trustpool)
+                           pool)]))
+
+(defn links [pool]
+  (-> {}
+      (self-link pool)))
+
+(defn to-json [pool]
+  {:name (:name pool)
+   :identity (:identity pool)
+   :challenge (:challenge pool)
+   :links (links pool)})

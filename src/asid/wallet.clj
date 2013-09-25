@@ -4,7 +4,6 @@
 
   (:require [clojure.data.json :as json]
             [asid.identity :as aid]
-            [asid.trust-pool :as tp]
             [asid.neo :as an])
 
   (:import [org.bouncycastle.jce.provider BouncyCastleProvider]
@@ -81,40 +80,3 @@
     (-> added :bag :item) => "value"
     (-> added :identity) => (-> orig :identity)
     (-> added :key :public) => (-> orig :key :public)))
-
-(defn add-link [so-far key func wallet]
-  (conj so-far [key (func wallet)]))
-
-(defn bag-link [so-far wallet]
-  (add-link so-far :bag bag-uri wallet))
-
-(defn trustpool-link [so-far wallet]
-  (add-link so-far :trustpool trustpool-uri wallet))
-
-(defn all-trustpool-links [so-far wallet]
-  (conj so-far [:trustpools (map #(tp/uri wallet %)
-                                 (an/sub-objects wallet :trustpool))]))
-
-(defn links []
-  (fn [wallet]
-    (-> {}
-       (bag-link wallet)
-       (trustpool-link wallet)
-       (all-trustpool-links wallet))))
-
-(def wallet-links (links))
-
-(defn to-json [wallet]
-  {:identity (:identity wallet)
-   :bag (:bag wallet)
-   :signatures (:signatures wallet)
-   :key {:public (-> wallet :key :public)}
-   :links (wallet-links wallet)})
-
-(fact
-  (let [tw (Wallet. "id" {} {} {:public "pub-key" :private "priv-key"})]
-    (to-json tw) => (contains {:identity "id"})
-    (to-json tw) => (contains {:key (contains {:public "pub-key"})})
-    (:key (to-json tw)) =not=> (contains {:private "priv-key"})
-    (:links (to-json tw)) => (contains {:bag "/id/bag"})
-    (:links (to-json tw)) => (contains {:trustpool "/id/trustpool"})))
