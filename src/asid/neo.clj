@@ -20,12 +20,18 @@
   (let [data-node (nn/create data)]
         (nrl/create node data-node link)))
 
-(defn sub-nodes [start type]
-  (remove nil? (map #(if-let [end-node (-> % :end)]
+(defn- nodes-by-direction [start type dir which-end]
+  (remove nil? (map #(if-let [end-node (-> % which-end)]
                        (nn/fetch-from end-node)
                        nil)
                     (nrl/traverse (:id start)
-                                  :relationships [{:direction "out" :type type}]))))
+                                  :relationships [{:direction dir :type type}]))))
+
+(defn sub-nodes [start type]
+  (nodes-by-direction start type "out" :end))
+
+(defn parent-nodes [start type]
+  (nodes-by-direction start type "in" :start))
 
 (defn sub-node [start type]
   (first (sub-nodes start type)))
@@ -34,3 +40,11 @@
   (if-let [node-id (:node-id start)]
     (map :data (sub-nodes {:id node-id} type))
     []))
+
+(defn parent-objects [start type]
+  (if-let [node-id (:node-id start)]
+    (map :data (parent-nodes {:id node-id} type))
+    []))
+
+(defn parent-object [start type]
+  (first (parent-objects start type)))

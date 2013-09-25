@@ -30,6 +30,8 @@
 
     %script#trustPoolsTmpl(type="text/html")
       %h3 {{ name }}
+      %br
+      %a.sign(href="#" data-pool="{{links.self}}") Connect&hellip;
       %code {{ identity }}
       %ol
         {{#challenge}}
