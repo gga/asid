@@ -16,6 +16,7 @@
             [asid.identity :as aid]
             [asid.wallet-repository :as wr]
             [asid.content-negotiation :as acn]
+            [asid.json-doc-exchange :as jde]
             [asid.static :as as]
             [asid.trust-pool :as tp]
             [asid.trust-pool-repository :as tpr])
@@ -36,7 +37,7 @@
               (created (w/uri new-id))))))
 
   (GET ["/:id", :id aid/grammar] [id :as {accepts :accepts}]
-       (let [wallet-json (json/write-str (w/to-json (wr/get-wallet repo id)))
+       (let [wallet-json (w/to-json (wr/get-wallet repo id))
              content-handlers {"text/html" (fn [_] (File. "resources/public/wallet/index.html"))
               
                                "application/vnd.org.asidentity.wallet+json"
@@ -52,12 +53,11 @@
                   (= 0 (count value)))
             (-> (response "Either key or value or both not supplied.")
                 (status 400))
-            (-> (response (json/write-str (w/to-json (wr/save repo (w/add-data wallet key value)))))
+            (-> (response (w/to-json (wr/save repo (w/add-data wallet key value))))
                 (content-type "application/vnd.org.asidentity.wallet+json")))))
 
-  (POST ["/:id/trustpool", :id aid/grammar] [id :as {body :body}]
+  (POST ["/:id/trustpool", :id aid/grammar] [id :as {pool-doc :json-doc}]
         (let [wallet (wr/get-wallet repo id)
-              pool-doc (json/read-str (slurp body))
               name (get pool-doc "name")]
           (if (= 0 (count name))
             (-> (response "A name must be provided.")
@@ -65,7 +65,7 @@
             (let [challenge-keys (get pool-doc "challenge")
                   pool (tpr/save repo (tp/new-trust-pool name challenge-keys))]
               (an/connect-nodes wallet pool :trustpool)
-              (-> (response (json/write-str (tp/to-json pool)))
+              (-> (response (tp/to-json pool))
                   (content-type "application/vnd.org.asidentity.trust-pool+json")
                   (header "Location" (tp/uri wallet pool))
                   (status 201))))))
@@ -73,13 +73,14 @@
   (GET "/:walletid/trustpool/:poolid" [walletid poolid]
        (let [wallet (wr/get-wallet repo walletid)
              pool (tpr/pool-from-wallet wallet poolid)]
-         (-> (response (json/write-str (tp/to-json pool)))
+         (-> (response (tp/to-json pool))
              (content-type "application/vnd.org.asidentity.trust-pool+json"))))
 
   (route/not-found (File. "resources/public/not-found.html")))
 
 (def app
   (-> (handler/site main-routes)
+      jde/json-documents
       acn/accepts
       acn/vary-by-accept
       (wrap-resource "public")
@@ -112,7 +113,8 @@
 (fact "/<wallet-id>/trustpool"
   (let [wallet (wr/save repo (w/new-wallet "seed"))
         req (app (-> (mr/request :post (w/trustpool-uri wallet)
-                                 (json/write-str {:name "hello" :challenge ["name"]}))))]
+                                 (json/write-str {:name "hello" :challenge ["name"]}))
+                     (mr/header "Content-Type" "application/vnd.org.asidentity.trust-pool+json")))]
     (:status req) => 201))
 
 (fact "/<wallet-id>/trustpool/<pool-id>"
