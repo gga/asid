@@ -8,8 +8,10 @@
                  [ring/ring-core "1.2.0"]
                  [ring/ring-jetty-adapter "1.2.0"]
                  [bouncycastle/bcprov-jdk16 "140"]
-                 [clojurewerkz/neocons "1.1.0"]]
+                 [clojurewerkz/neocons "1.1.0"]
+                 [clj-http "0.7.7"]]
   :profiles {:dev {:dependencies [[midje "1.5.0"]
+                                  [lein-midje "3.0.0"]
                                   [ring-mock "0.1.5"]]}}
 
   :ring {:handler asid/app})
