@@ -2,10 +2,12 @@
   (:use midje.sweet)
 
   (:require [asid.wallet.links :as awl]
-            [asid.trust-pool :as tp])
+            [asid.trust-pool :as tp]
+            [asid.calling-card :as cc])
 
   (:import [asid.wallet Wallet]
-           [asid.trust_pool TrustPool]))
+           [asid.trust_pool TrustPool]
+           [asid.calling_card CallingCard]))
 
 (defmulti to-json type)
 
@@ -35,3 +37,8 @@
    :identity (:identity pool)
    :challenge (:challenge pool)
    :links (tp/links pool)})
+
+(defmethod to-json CallingCard [card]
+  {:identity (:identity card)
+   :otherParty (:other-party card)
+   :links (cc/links card)})
