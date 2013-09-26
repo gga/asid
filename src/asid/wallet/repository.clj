@@ -1,4 +1,4 @@
-(ns asid.wallet-repository
+(ns asid.wallet.repository
   (:require [clojurewerkz.neocons.rest.nodes :as nn]
             [clojurewerkz.neocons.rest.relationships :as nrl]
             [clojurewerkz.neocons.rest.cypher :as cy]

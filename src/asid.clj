@@ -15,7 +15,7 @@
   (:require [asid.neo :as an]
             [asid.wallet :as w]
             [asid.identity :as aid]
-            [asid.wallet-repository :as wr]
+            [asid.wallet.repository :as wr]
             [asid.content-negotiation :as acn]
             [asid.json-doc-exchange :as jde]
             [asid.static :as as]
