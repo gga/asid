@@ -36,3 +36,8 @@
 (defn links [card]
   (-> {}
       (self-link card)))
+
+(defmethod render/to-json CallingCard [card]
+  {:identity (:identity card)
+   :otherParty (:other-party card)
+   :links (links card)})
