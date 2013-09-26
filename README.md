@@ -2,6 +2,12 @@
 
 *License*: [GPL Affero v3][agpl].
 
+*Encryption*: This project uses the BouncyCastle encryption libraries
+ to create digital signatures. These libraries are not included, you
+ will have to get hold of them yourself.
+ 
+[![Build Status](https://travis-ci.org/gga/asid.png)](https://travis-ci.org/gga/asid)
+
 ## Background
 
 Back at the beginning of January 2011 I read Aaron Swartz's article
