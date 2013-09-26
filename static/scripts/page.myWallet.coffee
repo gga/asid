@@ -9,7 +9,8 @@ define ['jquery', 'underscore'], ($, _) ->
     $('form#addTrustPool .challenge').empty()
     insertChallengeLine()
 
-  clear()
+  initialize: () ->
+    clear()
 
   onAddBagItem: (handler) ->
     $('form#addBagItem').on 'submit', (e) ->

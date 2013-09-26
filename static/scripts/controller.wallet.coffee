@@ -41,6 +41,7 @@ define ['underscore',
     navigator.changePage(walletUri)
 
   start: () ->
+    myWalletPage.initialize()
     walletRepo.get store.get('currentWalletUri'),
       ifSucceeded: (data) ->
         currentWallet = data
