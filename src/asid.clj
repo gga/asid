@@ -82,7 +82,8 @@
   (POST "/:walletid/trustpool/:poolid" [walletid poolid :as {calling-card :json-doc}]
         (let [wallet (wr/get-wallet repo walletid)
               pool (tpr/pool-from-wallet wallet poolid)]
-          (-> (cc/new-calling-card (:identity calling-card))
+          (-> (cc/new-calling-card (:identity calling-card)
+                                   (:uri calling-card))
               (cc/submit wallet pool)
               ccr/save
               (cc/attach pool)

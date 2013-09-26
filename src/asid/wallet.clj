@@ -52,6 +52,9 @@
 (defn trustpool-uri [wallet]
   (str (uri wallet) "/trustpool"))
 
+(defn letterplate-uri [wallet]
+  (str (uri wallet) "/letterplate"))
+
 (defn private-key [wallet]
   (let [factory (KeyFactory/getInstance "ECDSA" "BC")]
     (.generatePrivate factory (PKCS8EncodedKeySpec. (from-hex (-> wallet :key :private))))))
