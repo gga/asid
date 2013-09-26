@@ -21,7 +21,9 @@
             [asid.static :as as]
             [asid.response :as ar]
             [asid.trust-pool :as tp]
-            [asid.trust-pool-repository :as tpr])
+            [asid.trust-pool-repository :as tpr]
+            [asid.calling-card :as cc]
+            [asid.calling-card-repository :as ccr])
 
   (:import java.io.File))
 
@@ -76,6 +78,15 @@
              to-json
              response
              (content-type "application/vnd.org.asidentity.trust-pool+json"))))
+
+  (POST "/:walletid/trustpool/:poolid" [walletid poolid :as {calling-card :json-doc}]
+        (let [wallet (wr/get-wallet repo walletid)
+              pool (tpr/pool-from-wallet wallet poolid)]
+          (-> (cc/new-calling-card (:identity calling-card))
+              (cc/submit wallet pool)
+              ccr/save
+              (cc/attach pool)
+              (ar/created "application/vnd.org.asidentity.calling-card+json"))))
 
   (route/not-found (File. "resources/public/not-found.html")))
 
