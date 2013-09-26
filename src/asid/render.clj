@@ -1,11 +1,21 @@
-(ns asid.wallet.render
+(ns asid.render
   (:use midje.sweet)
 
-  (:require [asid.wallet.links :as awl])
+  (:require [asid.wallet.links :as awl]
+            [asid.trust-pool :as tp])
 
-  (:import [asid.wallet Wallet]))
+  (:import [asid.wallet Wallet]
+           [asid.trust_pool TrustPool]))
 
-(defn to-json [wallet]
+(defmulti to-json type)
+
+(defmethod to-json :default [coll]
+  coll)
+
+(fact
+  (to-json {:k "v"}) => {:k "v"})
+
+(defmethod to-json Wallet [wallet]
   {:identity (:identity wallet)
    :bag (:bag wallet)
    :signatures (:signatures wallet)
@@ -20,3 +30,8 @@
     (:links (to-json tw)) => (contains {:bag "/id/bag"})
     (:links (to-json tw)) => (contains {:trustpool "/id/trustpool"})))
 
+(defmethod to-json TrustPool [pool]
+  {:name (:name pool)
+   :identity (:identity pool)
+   :challenge (:challenge pool)
+   :links (tp/links pool)})

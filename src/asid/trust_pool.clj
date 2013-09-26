@@ -35,9 +35,3 @@
 (defn links [pool]
   (-> {}
       (self-link pool)))
-
-(defn to-json [pool]
-  {:name (:name pool)
-   :identity (:identity pool)
-   :challenge (:challenge pool)
-   :links (links pool)})
