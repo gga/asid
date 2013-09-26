@@ -1,4 +1,4 @@
-define ['jquery', 'underscore'], ($, _) ->
+define ['jquery', 'underscore', 'icanhaz'], ($, _, ich) ->
 
   insertChallengeLine = () ->
     $('form#addTrustPool .challenge').append(ich.challengeTmpl())
