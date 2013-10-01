@@ -33,17 +33,19 @@
 (defn self-link [so-far card]
   (conj so-far [:self (uri card)]))
 
-(defn links [card]
-  (-> {}
-      (self-link card)))
+(extend-type CallingCard
+  render/Linked
+
+  (links [card]
+    (-> {}
+        (self-link card))))
 
 (extend-type CallingCard
   render/Resource
 
   (to-json [card]
     {:identity (:identity card)
-     :otherParty (:other-party card)
-     :links (links card)})
+     :otherParty (:other-party card)})
 
   (content-type [_]
     "application/vnd.org.asidentity.calling-card+json"))
