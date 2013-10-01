@@ -4,7 +4,8 @@
 
   (:require [clojure.data.json :as json]
             [asid.identity :as aid]
-            [asid.neo :as an])
+            [asid.neo :as an]
+            [asid.render :as render])
 
   (:import [org.bouncycastle.jce.provider BouncyCastleProvider]
            [java.security KeyFactory Security KeyPairGenerator SecureRandom Signature]
@@ -83,3 +84,21 @@
     (-> added :bag :item) => "value"
     (-> added :identity) => (-> orig :identity)
     (-> added :key :public) => (-> orig :key :public)))
+
+(extend-type Wallet
+  render/Resource
+
+  (to-json [wallet]
+    {:identity (:identity wallet)
+     :bag (:bag wallet)
+     :signatures (:signatures wallet)
+     :key {:public (-> wallet :key :public)}})
+
+  (content-type [_]
+    "application/vnd.org.asidentity.wallet+json"))
+
+(fact
+  (let [tw (Wallet. "id" {} {} {:public "pub-key" :private "priv-key"})]
+    (render/to-json tw) => (contains {:identity "id"})
+    (render/to-json tw) => (contains {:key (contains {:public "pub-key"})})
+    (:key (render/to-json tw)) =not=> (contains {:private "priv-key"})))

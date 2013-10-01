@@ -3,7 +3,8 @@
 
   (:require [asid.wallet :as w]
             [asid.identity :as aid]
-            [asid.neo :as an]))
+            [asid.neo :as an]
+            [asid.render :as render]))
 
 (defrecord TrustPool [name identity challenge])
 
@@ -32,6 +33,20 @@
   (conj so-far [:self (uri (an/parent-object pool :trustpool)
                            pool)]))
 
-(defn links [pool]
-  (-> {}
-      (self-link pool)))
+(extend-type TrustPool
+  render/Resource
+
+  (to-json [pool]
+    {:name (:name pool)
+     :identity (:identity pool)
+     :challenge (:challenge pool)})
+
+  (content-type [_]
+    "application/vnd.org.asidentity.trust-pool+json"))
+
+(extend-type TrustPool
+  render/Linked
+
+  (links [pool]
+    (-> {}
+        (self-link pool))))
