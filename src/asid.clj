@@ -48,29 +48,30 @@
          (handler wallet)))
 
   (POST ["/:id/bag", :id aid/grammar] [id key value]
-        (let [wallet (wr/get-wallet repo id)]
-          (if (or (= 0 (count key))
-                  (= 0 (count value)))
-            (-> (response "Either key or value or both not supplied.")
-                (status 400))
-            (-> (wr/save repo (w/add-data wallet key value))
-                ar/resource))))
+        (if (or (= 0 (count key))
+                (= 0 (count value)))
+          (-> (response "Either key or value or both not supplied.")
+              (status 400))
+          (-> (wr/save repo (w/add-data (wr/get-wallet repo id)
+                                        key value))
+              ar/resource)))
 
   (POST ["/:id/trustpool", :id aid/grammar] [id :as {pool-doc :json-doc}]
-        (let [wallet (wr/get-wallet repo id)
-              name (get pool-doc "name")]
+        (let [name (get pool-doc "name")]
           (if (= 0 (count name))
             (-> (response "A name must be provided.")
                 (status 400))
             (let [challenge-keys (get pool-doc "challenge")
                   pool (tpr/save repo (tp/new-trust-pool name challenge-keys))]
-              (an/connect-nodes wallet pool :trustpool)
+              (an/connect-nodes (wr/get-wallet repo id)
+                                pool
+                                :trustpool)
               (ar/created pool)))))
 
   (GET "/:walletid/trustpool/:poolid" [walletid poolid]
-       (let [wallet (wr/get-wallet repo walletid)]
-         (-> (tpr/pool-from-wallet wallet poolid)
-             ar/resource)))
+       (-> (wr/get-wallet repo walletid)
+           (tpr/pool-from-wallet poolid)
+           ar/resource))
 
   (POST "/:walletid/trustpool/:poolid" [walletid poolid :as {calling-card :json-doc}]
         (let [wallet (wr/get-wallet repo walletid)
