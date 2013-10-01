@@ -30,8 +30,6 @@
 (def repo (an/initialize!))
 
 (defroutes main-routes
-  (GET "/favicon.ico" [] "")
-
   (POST "/identity" [_ :as {body :body}]
         (let [id-seed (slurp body)]
           (if (= 0 (count id-seed))
