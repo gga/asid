@@ -37,7 +37,13 @@
   (-> {}
       (self-link card)))
 
-(defmethod render/to-json CallingCard [card]
-  {:identity (:identity card)
-   :otherParty (:other-party card)
-   :links (links card)})
+(extend-type CallingCard
+  render/Resource
+
+  (to-json [card]
+    {:identity (:identity card)
+     :otherParty (:other-party card)
+     :links (links card)})
+
+  (content-type [_]
+    "application/vnd.org.asidentity.calling-card+json"))

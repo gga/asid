@@ -3,16 +3,20 @@
   (:require [ring.util.response :as rr]
             [asid.render :as render]))
 
-(defn created [body ct]
-  (let [json-body (render/to-json body)]
+(defn resource [obj]
+  (let [json-body (render/to-json obj)]
     (-> json-body
         rr/response
-        (rr/content-type ct)
-        (rr/header "Location" (-> json-body :links :self))
-        (rr/status 201))))
+        (rr/content-type (render/content-type obj))
+        (rr/header "Location" (-> json-body :links :self)))))
+
+(defn created [body]
+  (-> body
+      resource
+      (rr/status 201)))
 
 (fact
-  (created {:body true} "ct") => (contains {:body {:body true}})
-  (created {:body true} "ct") => (contains {:status 201})
-  (created {:body true} "ct") => (contains {:headers (contains {"Content-Type" "ct"})})
-  (created {:links {:self "uri"}} "ct") => (contains {:headers (contains {"Location" "uri"})}))
+  (created {:body true}) => (contains {:body {:body true}})
+  (created {:body true}) => (contains {:status 201})
+  (created {:body true}) => (contains {:headers (contains {"Content-Type" "application/vnd.clojure.map+json"})})
+  (created {:links {:self "uri"}}) => (contains {:headers (contains {"Location" "uri"})}))
