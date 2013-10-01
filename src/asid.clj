@@ -16,6 +16,7 @@
             [asid.trust-pool :as tp]
             [asid.wallet :as w]
             [asid.calling-card :as cc]
+            [asid.wallet.links :as awl]
             [asid.wallet.repository :as wr]
             [asid.content-negotiation :as acn]
             [asid.json-doc-exchange :as jde]

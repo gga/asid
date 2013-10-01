@@ -1,8 +1,7 @@
 (ns asid.render
   (:use midje.sweet)
 
-  (:require [asid.wallet.links :as awl]
-            [asid.trust-pool :as tp])
+  (:require [asid.trust-pool :as tp])
 
   (:import [asid.wallet Wallet]
            [asid.trust_pool TrustPool]))
@@ -31,17 +30,6 @@
     (to-json tw) => (contains {:identity "id"})
     (to-json tw) => (contains {:key (contains {:public "pub-key"})})
     (:key (to-json tw)) =not=> (contains {:private "priv-key"})))
-
-(extend-type Wallet
-  Linked
-
-  (links [wallet]
-    (awl/wallet-links wallet)))
-
-(fact
-  (let [tw (Wallet. "id" {} {} {:public "pub-key" :private "priv-key"})]
-    (links tw) => (contains {:bag "/id/bag"})
-    (links tw) => (contains {:trustpool "/id/trustpool"})))
 
 (extend-type TrustPool
   Resource

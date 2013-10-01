@@ -3,7 +3,10 @@
 
   (:require [asid.neo :as an]
             [asid.trust-pool :as tp]
-            [asid.wallet :as w]))
+            [asid.wallet :as w]
+            [asid.render :as render])
+
+  (:import [asid.wallet Wallet]))
 
 (defn add-link [so-far key func wallet]
   (conj so-far [key (func wallet)]))
@@ -24,8 +27,10 @@
 (defn letterplate-link [so-far wallet]
   (add-link so-far :letterplate w/letterplate-uri wallet))
 
-(defn links []
-  (fn [wallet]
+(extend-type Wallet
+  render/Linked
+
+  (links [wallet]
     (-> {}
         (self-link wallet)
         (bag-link wallet)
@@ -33,8 +38,10 @@
         (all-trustpool-links wallet)
         (letterplate-link wallet))))
 
-(def wallet-links (links))
-
 (fact
+  (let [tw (Wallet. "id" {} {} {:public "pub-key" :private "priv-key"})]
+    (render/links tw) => (contains {:bag "/id/bag"})
+    (render/links tw) => (contains {:trustpool "/id/trustpool"}))
+
   (let [wallet (w/new-wallet "seed")]
-    (:self (wallet-links wallet)) => (str "/" (:identity wallet))))
+    (:self (render/links wallet)) => (str "/" (:identity wallet))))
