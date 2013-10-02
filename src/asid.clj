@@ -34,7 +34,8 @@
         (let [id-seed (slurp body)]
           (if (empty? id-seed)
             (ar/bad-request "Identity seed not supplied")
-            (-> (wr/save repo (w/new-wallet id-seed))
+            (-> (w/new-wallet id-seed)
+                (wr/save repo)
                 ar/created))))
 
   (GET ["/:id", :id aid/grammar] [id :as {accepts :accepts}]
@@ -51,8 +52,9 @@
         (if (or (empty? key)
                 (empty? value))
           (ar/bad-request "Either key or value or both not supplied.")
-          (-> (wr/save repo (w/add-data (wr/get-wallet repo id)
-                                        key value))
+          (-> (wr/get-wallet repo id)
+              (w/add-data key value)
+              (wr/save repo)
               ar/resource)))
 
   (POST ["/:id/trustpool", :id aid/grammar] [id :as {pool-doc :json-doc}]
@@ -60,7 +62,7 @@
           (if (empty? name)
             (ar/bad-request "A name must be provided.")
             (let [challenge-keys (get pool-doc "challenge")
-                  pool (tpr/save repo (tp/new-trust-pool name challenge-keys))]
+                  pool (tpr/save (tp/new-trust-pool name challenge-keys) repo)]
               (an/connect-nodes (wr/get-wallet repo id)
                                 pool
                                 :trustpool)
@@ -105,26 +107,26 @@
     (:status req) => 400))
 
 (fact "/<wallet-id>"
-  (let [wallet (wr/save repo (w/new-wallet "seed"))
+  (let [wallet (wr/save (w/new-wallet "seed") repo)
         req (app (-> (mr/request :get (w/uri wallet))
                      (mr/header "Accept" "text/html, application/xml")))]
     (:status req) => 200))
 
 (fact "/<wallet-id>/bag"
-  (let [wallet (wr/save repo (w/new-wallet "seed"))
+  (let [wallet (wr/save (w/new-wallet "seed") repo)
         req (app (mr/request :post (w/bag-uri wallet) {"key" "key1" "value" "new-value"}))]
     (:status req) => 200))
 
 (fact "/<wallet-id>/trustpool"
-  (let [wallet (wr/save repo (w/new-wallet "seed"))
+  (let [wallet (wr/save (w/new-wallet "seed") repo)
         req (app (-> (mr/request :post (w/trustpool-uri wallet)
                                  (json/write-str {:name "hello" :challenge ["name"]}))
                      (mr/header "Content-Type" "application/vnd.org.asidentity.trust-pool+json")))]
     (:status req) => 201))
 
 (fact "/<wallet-id>/trustpool/<pool-id>"
-  (let [wallet (wr/save repo (w/new-wallet "seed"))
-        pool (tpr/save repo (tp/new-trust-pool "pool" ["name" "dob"]))]
+  (let [wallet (wr/save (w/new-wallet "seed") repo)
+        pool (tpr/save (tp/new-trust-pool "pool" ["name" "dob"]) repo)]
     (an/connect-nodes wallet pool :trustpool)
     (let [req (app (-> (mr/request :get (tp/uri wallet pool))
                        (mr/header "Accept" "application/vnd.org.asidentity.trust-pool+json")))]

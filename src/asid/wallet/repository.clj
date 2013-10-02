@@ -26,7 +26,7 @@
       (nn/update node data)))
   wallet)
 
-(defn save [ctxt wallet]
+(defn save [wallet ctxt]
   (if (:node-id wallet)
     (update wallet)
     (let [node (nn/create {:identity (:identity wallet)})]

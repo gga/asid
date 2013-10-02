@@ -6,7 +6,7 @@
 
   (:import [asid.trust_pool TrustPool]))
 
-(defn save [ctxt pool]
+(defn save [pool ctxt]
   (let [node (nn/create {:identity (:identity pool)
                          :name (:name pool)
                          :challenge (:challenge pool)})]
