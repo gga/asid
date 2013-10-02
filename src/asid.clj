@@ -32,9 +32,8 @@
 (defroutes main-routes
   (POST "/identity" [_ :as {body :body}]
         (let [id-seed (slurp body)]
-          (if (= 0 (count id-seed))
-            (-> (response "Identity seed not supplied")
-                (status 400))
+          (if (empty? id-seed)
+            (ar/bad-request "Identity seed not supplied")
             (-> (wr/save repo (w/new-wallet id-seed))
                 ar/created))))
 
@@ -49,19 +48,17 @@
          (handler wallet)))
 
   (POST ["/:id/bag", :id aid/grammar] [id key value]
-        (if (or (= 0 (count key))
-                (= 0 (count value)))
-          (-> (response "Either key or value or both not supplied.")
-              (status 400))
+        (if (or (empty? key)
+                (empty? value))
+          (ar/bad-request "Either key or value or both not supplied.")
           (-> (wr/save repo (w/add-data (wr/get-wallet repo id)
                                         key value))
               ar/resource)))
 
   (POST ["/:id/trustpool", :id aid/grammar] [id :as {pool-doc :json-doc}]
         (let [name (get pool-doc "name")]
-          (if (= 0 (count name))
-            (-> (response "A name must be provided.")
-                (status 400))
+          (if (empty? name)
+            (ar/bad-request "A name must be provided.")
             (let [challenge-keys (get pool-doc "challenge")
                   pool (tpr/save repo (tp/new-trust-pool name challenge-keys))]
               (an/connect-nodes (wr/get-wallet repo id)
