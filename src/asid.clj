@@ -39,7 +39,7 @@
                 ar/created))))
 
   (GET ["/:id", :id aid/grammar] [id :as {accepts :accepts}]
-       (let [wallet (wr/get-wallet repo id)
+       (let [wallet (wr/get-wallet id repo)
              content-handlers {"text/html" (fn [_]
                                              (File. "resources/public/wallet/index.html"))
               
@@ -52,7 +52,7 @@
         (if (or (empty? key)
                 (empty? value))
           (ar/bad-request "Either key or value or both not supplied.")
-          (-> (wr/get-wallet repo id)
+          (-> (wr/get-wallet id repo)
               (w/add-data key value)
               (wr/save repo)
               ar/resource)))
@@ -63,18 +63,18 @@
             (ar/bad-request "A name must be provided.")
             (let [challenge-keys (get pool-doc "challenge")
                   pool (tpr/save (tp/new-trust-pool name challenge-keys) repo)]
-              (an/connect-nodes (wr/get-wallet repo id)
+              (an/connect-nodes (wr/get-wallet id repo)
                                 pool
                                 :trustpool)
               (ar/created pool)))))
 
   (GET "/:walletid/trustpool/:poolid" [walletid poolid]
-       (-> (wr/get-wallet repo walletid)
+       (-> (wr/get-wallet walletid repo)
            (tpr/pool-from-wallet poolid)
            ar/resource))
 
   (POST "/:walletid/trustpool/:poolid" [walletid poolid :as {calling-card :json-doc}]
-        (let [wallet (wr/get-wallet repo walletid)
+        (let [wallet (wr/get-wallet walletid repo)
               pool (tpr/pool-from-wallet wallet poolid)]
           (-> (cc/new-calling-card (:identity calling-card)
                                    (:uri calling-card))

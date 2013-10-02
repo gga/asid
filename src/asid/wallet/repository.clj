@@ -35,7 +35,7 @@
       (nrl/create (:root ctxt) node :wallet)
       (conj wallet [:node-id (:id node)]))))
 
-(defn get-wallet [ctxt id]
+(defn get-wallet [id ctxt]
   (-> (cy/tquery (str "START asid=node({root}) "
                       "MATCH asid-[:wallet]->wallet "
                       "WHERE wallet.identity = {walletid} "
