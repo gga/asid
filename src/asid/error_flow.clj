@@ -25,19 +25,24 @@
               m
               (f m)))])
 
-(defn add-monadic-expr [insert form]
+(defn bind-monadic-expr-into-form [insert form]
   (list 'm-bind insert (if (seq? form)
                          `(fn [bound#] (~(first form) bound# ~@(rest form)))
                          `(fn [bound#] (~form bound#)))))
 
-(defmacro f->
-  ([x]
-     `(monad/with-monad failure-m ~x))
-  ([x form]
-     `(monad/with-monad failure-m
-        ~(add-monadic-expr x form)))
-  ([x form & more]
-     `(f-> (f-> ~x ~form) ~@more)))
+(defmacro m->
+  ([m x]
+     `(monad/with-monad ~m ~x))
+  ([m x form]
+     `(monad/with-monad ~m
+        ~(bind-monadic-expr-into-form x form)))
+  ([m x form & more]
+     `(m-> ~m (m-> ~m ~x ~form) ~@more)))
+
+(defmacro fail->
+  ([x] `(m-> ~failure-m ~x))
+  ([x form] `(m-> failure-m ~x ~form))
+  ([x form & more] `(fail-> (fail-> ~x ~form) ~@more)))
 
 (defn- succeed [v]
   v)
@@ -51,25 +56,25 @@
     m))
 
 (fact
-  (f-> 10 (+ 9)) => 19
-  (f-> {} succeed) => {}
-  (f-> 10 (+ 9) (- 11)) => 8)
+  (fail-> 10 (+ 9)) => 19
+  (fail-> {} succeed) => {}
+  (fail-> 10 (+ 9) (- 11)) => 8)
 
 (defn- short-steps [limit]
-  (f-> {:limit 50}
-       (fail limit)))
+  (fail-> {:limit 50}
+          (fail limit)))
 
 (fact
   (short-steps 10) => {:limit 50}
   (short-steps 100) => (partial instance? Failure))
 
 (defn- more-steps [limit]
-  (f-> {}
-       succeed
-       (include :limit 50)
-       (fail limit)
-       (include :value 100)
-       (show :value)))
+  (fail-> {}
+          succeed
+          (include :limit 50)
+          (fail limit)
+          (include :value 100)
+          (show :value)))
 
 (fact
   (more-steps 10) => 100
