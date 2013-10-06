@@ -136,4 +136,8 @@
     (an/connect-nodes wallet pool :trustpool)
     (let [req (app (-> (mr/request :get (tp/uri wallet pool))
                        (mr/header "Accept" "application/vnd.org.asidentity.trust-pool+json")))]
-      (:status req) => 200)))
+      (:status req) => 200)
+    (let [req (app (-> (mr/request :get (str (w/uri wallet) "/trustpool/bada-bada-bada-1d"))
+                       (mr/header "Accept" "application/vnd.org.asidentity.trust-pool+json")))]
+      (:status req) => 404
+      (:body req) => "Not found.")))
