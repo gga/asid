@@ -4,7 +4,7 @@
         ring.middleware.file-info
         ring.util.response
         midje.sweet
-        [asid.error-flow :only [fail->]]
+        [asid.error.thread :only [fail->]]
         [asid.error.definition :only [validate!]])
 
   (:require [compojure.route :as route]

@@ -1,4 +1,4 @@
-(ns asid.error-flow
+(ns asid.error.thread
   (:use midje.sweet
         asid.error.definition)
 
