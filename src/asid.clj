@@ -3,7 +3,8 @@
         ring.middleware.resource
         ring.middleware.file-info
         ring.util.response
-        midje.sweet)
+        midje.sweet
+        [asid.error-flow :only [fail->]])
 
   (:require [compojure.route :as route]
             [compojure.handler :as handler]
@@ -34,28 +35,27 @@
         (let [id-seed (slurp body)]
           (if (empty? id-seed)
             (ar/bad-request "Identity seed not supplied")
-            (-> (w/new-wallet id-seed)
-                (wr/save repo)
-                ar/created))))
+            (fail-> (w/new-wallet id-seed)
+                    (wr/save repo)
+                    ar/created))))
 
   (GET ["/:id", :id aid/grammar] [id :as {accepts :accepts}]
-       (let [wallet (wr/get-wallet id repo)
-             content-handlers {"text/html" (fn [_]
-                                             (File. "resources/public/wallet/index.html"))
-              
-                               "application/vnd.org.asidentity.wallet+json" ar/resource}
+       (let [content {"text/html" (fn [] (File. "resources/public/wallet/index.html"))
+                      "application/vnd.org.asidentity.wallet+json" (fn [] (fail->
+                                                                           (wr/get-wallet id repo)
+                                                                           ar/resource))}
 
-             handler (first (remove nil? (map content-handlers accepts)))]
-         (handler wallet)))
+             handler (first (remove nil? (map content accepts)))]
+         (handler)))
 
   (POST ["/:id/bag", :id aid/grammar] [id key value]
         (if (or (empty? key)
                 (empty? value))
           (ar/bad-request "Either key or value or both not supplied.")
-          (-> (wr/get-wallet id repo)
-              (w/add-data key value)
-              (wr/save repo)
-              ar/resource)))
+          (fail-> (wr/get-wallet id repo)
+                  (w/add-data key value)
+                  (wr/save repo)
+                  ar/resource)))
 
   (POST ["/:id/trustpool", :id aid/grammar] [id :as {pool-doc :json-doc}]
         (let [name (get pool-doc "name")]
@@ -69,19 +69,19 @@
               (ar/created pool)))))
 
   (GET "/:walletid/trustpool/:poolid" [walletid poolid]
-       (-> (wr/get-wallet walletid repo)
-           (tpr/pool-from-wallet poolid)
-           ar/resource))
+       (fail-> (wr/get-wallet walletid repo)
+               (tpr/pool-from-wallet poolid)
+               ar/resource))
 
   (POST "/:walletid/trustpool/:poolid" [walletid poolid :as {calling-card :json-doc}]
         (let [wallet (wr/get-wallet walletid repo)
               pool (tpr/pool-from-wallet wallet poolid)]
-          (-> (cc/new-calling-card (:identity calling-card)
-                                   (:uri calling-card))
-              (cc/submit wallet pool)
-              ccr/save
-              (cc/attach pool)
-              (ar/created "application/vnd.org.asidentity.calling-card+json"))))
+          (fail-> (cc/new-calling-card (:identity calling-card)
+                                       (:uri calling-card))
+                  (cc/submit wallet pool)
+                  ccr/save
+                  (cc/attach pool)
+                  (ar/created "application/vnd.org.asidentity.calling-card+json"))))
 
   (route/not-found (File. "resources/public/not-found.html")))
 
