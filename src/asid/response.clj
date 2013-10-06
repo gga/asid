@@ -1,7 +1,12 @@
 (ns asid.response
-  (:use midje.sweet)
+  (:use midje.sweet
+        asid.error.definition)
+
   (:require [ring.util.response :as rr]
-            [asid.render :as render]))
+            [asid.render :as render]
+            [compojure.response :as compojure])
+
+  (:import [asid.error.definition Failure]))
 
 (defn resource [obj]
   (let [links (render/links obj)
@@ -41,3 +46,10 @@
   (created {:body true}) => (contains {:status 201})
   (created {:body true}) => (contains {:headers (contains {"Content-Type" "application/vnd.clojure.map+json"})})
   (created {}) => (contains {:headers (contains {"Location" "map-link"})}))
+
+(extend-type Failure
+  compojure/Renderable
+
+  (render [f req]
+    {:status (:status f)
+     :body (:message f)}))

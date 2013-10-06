@@ -1,9 +1,24 @@
 (ns asid.error-flow
-  (:use midje.sweet)
+  (:use midje.sweet
+        asid.error.definition)
 
-  (:require [clojure.algo.monads :as monad]))
+  (:require [clojure.algo.monads :as monad])
 
-(defrecord Failure [status message])
+  (:import [asid.error.definition Failure]))
+
+(defn- bind-monadic-expr-into-form [insert form]
+  (list 'm-bind insert (if (seq? form)
+                         `(fn [bound#] (~(first form) bound# ~@(rest form)))
+                         `(fn [bound#] (~form bound#)))))
+
+(defmacro m->
+  ([m x]
+     `(monad/with-monad ~m ~x))
+  ([m x form]
+     `(monad/with-monad ~m
+        ~(bind-monadic-expr-into-form x form)))
+  ([m x form & more]
+     `(m-> ~m (m-> ~m ~x ~form) ~@more)))
 
 (defprotocol Failed
   (has-failed? [failure]))
@@ -24,20 +39,6 @@
             (if (has-failed? m)
               m
               (f m)))])
-
-(defn bind-monadic-expr-into-form [insert form]
-  (list 'm-bind insert (if (seq? form)
-                         `(fn [bound#] (~(first form) bound# ~@(rest form)))
-                         `(fn [bound#] (~form bound#)))))
-
-(defmacro m->
-  ([m x]
-     `(monad/with-monad ~m ~x))
-  ([m x form]
-     `(monad/with-monad ~m
-        ~(bind-monadic-expr-into-form x form)))
-  ([m x form & more]
-     `(m-> ~m (m-> ~m ~x ~form) ~@more)))
 
 (defmacro fail->
   ([x] `(m-> ~failure-m ~x))

@@ -4,7 +4,8 @@
         ring.middleware.file-info
         ring.util.response
         midje.sweet
-        [asid.error-flow :only [fail->]])
+        [asid.error-flow :only [fail->]]
+        [asid.error.definition :only [validate!]])
 
   (:require [compojure.route :as route]
             [compojure.handler :as handler]
@@ -33,11 +34,10 @@
 (defroutes main-routes
   (POST "/identity" [_ :as {body :body}]
         (let [id-seed (slurp body)]
-          (if (empty? id-seed)
-            (ar/bad-request "Identity seed not supplied")
-            (fail-> (w/new-wallet id-seed)
-                    (wr/save repo)
-                    ar/created))))
+          (fail-> (validate! :not-empty id-seed "id seed")
+                  w/new-wallet
+                  (wr/save repo)
+                  ar/created)))
 
   (GET ["/:id", :id aid/grammar] [id :as {accepts :accepts}]
        (let [content {"text/html" (fn [] (File. "resources/public/wallet/index.html"))
