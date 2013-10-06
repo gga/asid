@@ -21,10 +21,6 @@
       resource
       (rr/status 201)))
 
-(defn bad-request [msg]
-  (-> (rr/response msg)
-      (rr/status 400)))
-
 (extend-type clojure.lang.PersistentArrayMap
   render/Linked
   (links [m]

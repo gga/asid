@@ -65,12 +65,10 @@
          [data (validate! pool-doc :not-empty "name")
           name (get data "name")
           challenge-keys (get data "challenge")
-          pool (tpr/save (tp/new-trust-pool name challenge-keys) repo)]
-         (do
-           (an/connect-nodes (wr/get-wallet id repo)
-                             pool
-                             :trustpool)
-           (ar/created pool))))
+          pool (tpr/save (tp/new-trust-pool name challenge-keys) repo)
+          wallet (wr/get-wallet id repo)
+          conn (an/connect-nodes wallet pool :trustpool)]
+         (ar/created pool)))
 
   (GET "/:walletid/trustpool/:poolid" [walletid poolid]
        (fail-> (wr/get-wallet walletid repo)
@@ -78,14 +76,14 @@
                ar/resource))
 
   (POST "/:walletid/trustpool/:poolid" [walletid poolid :as {calling-card :json-doc}]
-        (let [wallet (wr/get-wallet walletid repo)
-              pool (tpr/pool-from-wallet wallet poolid)]
-          (fail-> (cc/new-calling-card (:identity calling-card)
-                                       (:uri calling-card))
-                  (cc/submit wallet pool)
-                  ccr/save
-                  (cc/attach pool)
-                  (ar/created "application/vnd.org.asidentity.calling-card+json"))))
+        (dofailure [wallet (wr/get-wallet walletid repo)
+                    pool (tpr/pool-from-wallet wallet poolid)]
+                   (fail-> (cc/new-calling-card (:identity calling-card)
+                                                (:uri calling-card))
+                           (cc/submit wallet pool)
+                           ccr/save
+                           (cc/attach pool)
+                           (ar/created "application/vnd.org.asidentity.calling-card+json"))))
 
   (route/not-found (File. "resources/public/not-found.html")))
 
@@ -111,6 +109,10 @@
     (:status req) => 400))
 
 (fact "/<wallet-id>"
+  (let [req (app (-> (mr/request :get "/bada-bada-bada-1d")
+                     (mr/header "Accept" "application/vnd.org.asidentity.wallet+json")))]
+    (:status req) => 404
+    (:body req) => "Not found.")
   (let [wallet (wr/save (w/new-wallet "seed") repo)
         req (app (-> (mr/request :get (w/uri wallet))
                      (mr/header "Accept" "text/html, application/xml")))]

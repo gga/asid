@@ -3,8 +3,11 @@
 
 (defrecord Failure [status message])
 
-(defn bad-request-data [msg]
+(defn bad-request [msg]
   (Failure. 400 msg))
+
+(defn not-found []
+  (Failure. 404 "Not found."))
 
 (defn- check-keyword [data check param]
   check)
@@ -13,5 +16,5 @@
 
 (defmethod validate! :not-empty [data _ name]
   (if (empty? (get data name))
-    (bad-request-data (str name " is required."))
+    (bad-request (str name " is required."))
     data))
