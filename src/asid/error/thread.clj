@@ -45,6 +45,9 @@
   ([x form] `(m-> failure-m ~x ~form))
   ([x form & more] `(fail-> (fail-> ~x ~form) ~@more)))
 
+(defmacro dofailure [bindings expr]
+  `(monad/domonad failure-m ~bindings ~expr))
+
 (defn- succeed [v]
   v)
 (defn- include [m k v]

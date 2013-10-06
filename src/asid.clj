@@ -4,7 +4,7 @@
         ring.middleware.file-info
         ring.util.response
         midje.sweet
-        [asid.error.thread :only [fail->]]
+        [asid.error.thread :only [fail-> dofailure]]
         [asid.error.definition :only [validate!]])
 
   (:require [compojure.route :as route]
@@ -34,7 +34,9 @@
 (defroutes main-routes
   (POST "/identity" [_ :as {body :body}]
         (let [id-seed (slurp body)]
-          (fail-> (validate! :not-empty id-seed "id seed")
+          (fail-> {"id seed" id-seed}
+                  (validate! :not-empty "id seed")
+                  (get "id seed")
                   w/new-wallet
                   (wr/save repo)
                   ar/created)))
@@ -49,24 +51,26 @@
          (handler)))
 
   (POST ["/:id/bag", :id aid/grammar] [id key value]
-        (if (or (empty? key)
-                (empty? value))
-          (ar/bad-request "Either key or value or both not supplied.")
-          (fail-> (wr/get-wallet id repo)
-                  (w/add-data key value)
-                  (wr/save repo)
-                  ar/resource)))
+        (fail-> {"id" id, "key" key, "value" value}
+                (validate! :not-empty "key")
+                (validate! :not-empty "value")
+                (get "id")
+                (wr/get-wallet repo)
+                (w/add-data key value)
+                (wr/save repo)
+                ar/resource))
 
   (POST ["/:id/trustpool", :id aid/grammar] [id :as {pool-doc :json-doc}]
-        (let [name (get pool-doc "name")]
-          (if (empty? name)
-            (ar/bad-request "A name must be provided.")
-            (let [challenge-keys (get pool-doc "challenge")
-                  pool (tpr/save (tp/new-trust-pool name challenge-keys) repo)]
-              (an/connect-nodes (wr/get-wallet id repo)
-                                pool
-                                :trustpool)
-              (ar/created pool)))))
+        (dofailure
+         [data (validate! pool-doc :not-empty "name")
+          name (get data "name")
+          challenge-keys (get data "challenge")
+          pool (tpr/save (tp/new-trust-pool name challenge-keys) repo)]
+         (do
+           (an/connect-nodes (wr/get-wallet id repo)
+                             pool
+                             :trustpool)
+           (ar/created pool))))
 
   (GET "/:walletid/trustpool/:poolid" [walletid poolid]
        (fail-> (wr/get-wallet walletid repo)
