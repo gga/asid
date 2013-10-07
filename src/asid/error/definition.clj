@@ -9,6 +9,12 @@
 (defn not-found []
   (Failure. 404 "Not found."))
 
+(defn unavailable []
+  (Failure. 500 "Service unavailable."))
+
+(defn bad-gateway []
+  (Failure. 502 "Remote service unavailable."))
+
 (defn- check-keyword [data check param]
   check)
 

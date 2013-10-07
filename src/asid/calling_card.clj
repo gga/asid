@@ -1,34 +1,67 @@
 (ns asid.calling-card
-  (:use midje.sweet)
+  (:use midje.sweet
+        [asid.error.thread :only [fail->]])
 
   (:require [clojure.data.json :as json]
             [asid.identity :as aid]
+            [asid.wallet :as w]
             [asid.neo :as an]
             [asid.strings :as as]
             [asid.render :as render]
+            [asid.error.definition :as ed]
             [clj-http.client :as http]))
 
-(defrecord CallingCard [identity id-uri other-party])
+(defrecord CallingCard [card-id target-uri other-party])
 
-(defn new-calling-card [id-uri other-party-identity]
+(defn uri [card wallet]
+  (str (w/uri wallet) "/card/" (:identity card)))
+
+(defn new-calling-card [target-uri other-party-identity]
   (CallingCard. (aid/new-identity other-party-identity)
-                id-uri
+                target-uri
                 other-party-identity))
 
-;; Error handling!
+(defn- http-failed? [resp]
+  (let [status (:status resp)]
+    (cond
+     (some #{404 406} [status]) (bad-request "Remote endpoint did not understand request.")
+     (< 399 status 500) (unavailable)
+     (> status 500) (bad-gateway)
+     :else resp)))
+
+(defn- find-letterplate [card]
+  (fail-> (http/get (:target-uri card)
+                    {:accept "application/vnd.org.asidentity.introduction+json"})
+          http-failed?
+          :body
+          (json/read-str :key-fn keyword)))
+
+(defn- connection-request [card wallet pool]
+  {:from (:identity wallet)
+   :trust {:name (:name pool)
+           :identity (:identity pool)
+           :challenge (:challenge pool)}
+   :links {:self (uri card wallet)
+           :initiator (w/uri wallet)}})
+
+(defn- seek-introduction [intro card wallet pool]
+  (fail-> (as/resolve-url (-> :links :letterplate intro) (:target-uri card))
+          (http/post {:body (json/write-str (connection-request card wallet pool))
+                      :content-type "vnd/application.org.asidentity.connection-request+json"})
+          http-failed?
+          (-> :headers (get "location"))))
+
+(defn- remember-counterpart [location card]
+  (conj card [:counterpart location]))
+
 (defn submit [card wallet pool]
-  (let [other-identity (http/get (:id-uri card))
-        id-doc (json/read-str (:body other-identity)
-                              :key-fn keyword)]
-    (http/post (as/resolve-url (-> :links :letterplate id-doc) (:id-uri card))
-               {:body (json/write-str (render/to-json card))})))
+  (fail-> (find-letterplate card)
+          (seek-introduction card wallet pool)
+          (remember-counterpart card)))
 
 (defn attach [card pool]
   (an/connect-nodes card pool :adds-identity)
   card)
-
-(defn uri [card]
-  (str "/card" (:identity card)))
 
 (defn self-link [so-far card]
   (conj so-far [:self (uri card)]))
