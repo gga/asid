@@ -18,6 +18,7 @@
             [asid.trust-pool :as tp]
             [asid.wallet :as w]
             [asid.calling-card :as cc]
+            [asid.introduction :as i]
             [asid.wallet.links :as awl]
             [asid.wallet.repository :as wr]
             [asid.content-negotiation :as acn]
@@ -42,10 +43,18 @@
                   ar/created)))
 
   (GET ["/:id", :id aid/grammar] [id :as {accepts :accepts}]
-       (let [content {"text/html" (fn [] (File. "resources/public/wallet/index.html"))
-                      "application/vnd.org.asidentity.wallet+json" (fn [] (fail->
-                                                                           (wr/get-wallet id repo)
-                                                                           ar/resource))}
+       (let [content {"text/html"
+                      (fn [] (File. "resources/public/wallet/index.html"))
+
+                      "application/vnd.org.asidentity.wallet+json"
+                      (fn [] (fail->
+                              (wr/get-wallet id repo)
+                              ar/resource))
+
+                      "application/vnd.org.asidentity.introduction+json"
+                      (fn [] (fail-> (wr/get-wallet id repo)
+                                     (i/intro-to-wallet)
+                                     ar/resource))}
 
              handler (first (remove nil? (map content accepts)))]
          (handler)))
@@ -116,7 +125,13 @@
   (let [wallet (wr/save (w/new-wallet "seed") repo)
         req (app (-> (mr/request :get (w/uri wallet))
                      (mr/header "Accept" "text/html, application/xml")))]
-    (:status req) => 200))
+    (:status req) => 200)
+  (let [wallet (wr/save (w/new-wallet "seed") repo)
+        req (app (-> (mr/request :get (w/uri wallet))
+                     (mr/header "Accept" "application/vnd.org.asidentity.introduction+json")))
+        intro-doc (json/read-str (:body req))]
+    (:status req) => 200
+    (-> intro-doc :bag) => nil?))
 
 (fact "/<wallet-id>/bag"
   (let [wallet (wr/save (w/new-wallet "seed") repo)

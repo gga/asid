@@ -1,5 +1,4 @@
-(ns asid.render
-  (:use midje.sweet))
+(ns asid.render)
 
 (defprotocol Linked
   (links [this] "Returns a map of generated links for the object."))
