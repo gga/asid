@@ -131,7 +131,7 @@
                      (mr/header "Accept" "application/vnd.org.asidentity.introduction+json")))
         intro-doc (json/read-str (:body req))]
     (:status req) => 200
-    (-> intro-doc :bag) => nil?))
+    (-> intro-doc (get "bag")) => nil?))
 
 (fact "/<wallet-id>/bag"
   (let [wallet (wr/save (w/new-wallet "seed") repo)
