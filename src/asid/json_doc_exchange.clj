@@ -7,11 +7,10 @@
 
 (defn- ct [req-or-resp]
   (let [hdrs (:headers req-or-resp)]
-    (if (contains? hdrs "Content-Type")
-      (get hdrs "Content-Type")
-      (if (contains? hdrs "content-type")
-        (get hdrs "content-type")
-        ""))))
+    (cond
+     (contains? hdrs "Content-Type") (get hdrs "Content-Type")
+     (contains? hdrs "content-type") (get hdrs "content-type")
+     :else "")))
 
 (fact
   (ct (mr/request :get "/")) => ""
@@ -33,12 +32,12 @@
 (defn json-documents [handler]
   (fn [req]
     (let [json-doc (if (content-type-json? req)
-                          (try
-                            (json/read-str (slurp (:body req)))
-                            (catch Exception _ 
-                              (-> (rr/response "JSON could not be parsed.")
-                                  (rr/status 400))))
-                          nil)
+                     (try
+                       (json/read-str (slurp (:body req)))
+                       (catch Exception _ 
+                         (-> (rr/response "JSON could not be parsed.")
+                             (rr/status 400))))
+                     nil)
           response (handler (conj req [:json-doc json-doc]))]
       (if (content-type-json? response)
         (conj response [:body (json/write-str (:body response))])
