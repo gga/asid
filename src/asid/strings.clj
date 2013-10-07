@@ -21,8 +21,8 @@
 
 (defn resolve-url [rel orig]
   (-> (URI. orig)
-    (.resolve rel)
-    .toString))
+      (.resolve rel)
+      .toString))
 
 (fact
   (resolve-url "/hello" "http://localhost:8888/hfdf-45fd") => "http://localhost:8888/hello")
