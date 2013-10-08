@@ -9,6 +9,7 @@
             [asid.strings :as as]
             [asid.render :as render]
             [asid.error.definition :as ed]
+            [asid.current-request :as req]
             [clj-http.client :as http]))
 
 (defrecord CallingCard [card-id target-uri other-party])
@@ -41,8 +42,8 @@
    :trust {:name (:name pool)
            :identity (:identity pool)
            :challenge (:challenge pool)}
-   :links {:self (uri card wallet)
-           :initiator (w/uri wallet)}})
+   :links {:self (req/url-relative-to-request (uri card wallet))
+           :initiator (req/url-relative-to-request (w/uri wallet))}})
 
 (defn- seek-introduction [intro card wallet pool]
   (fail-> (as/resolve-url (-> :links :letterplate intro) (:target-uri card))

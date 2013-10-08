@@ -19,15 +19,17 @@
             [asid.wallet :as w]
             [asid.calling-card :as cc]
             [asid.introduction :as i]
+            [asid.connection-request :as conn]
             [asid.wallet.links :as awl]
             [asid.wallet.repository :as wr]
             [asid.content-negotiation :as acn]
             [asid.json-doc-exchange :as jde]
             [asid.static :as as]
+            [asid.current-request :as req]
             [asid.response :as ar]
             [asid.trust-pool-repository :as tpr]
             [asid.calling-card-repository :as ccr]
-            [asid.current-request :as req])
+            [asid.connection-request-repository :as cr])
 
   (:import java.io.File))
 
@@ -94,6 +96,12 @@
                            ccr/save
                            (cc/attach pool)
                            (ar/created "application/vnd.org.asidentity.calling-card+json"))))
+
+  (POST ["/:id/letterplate", :id aid/grammar] [walletid :as {conn-req :json-doc}]
+        (dofailure [wallet (wr/get-wallet walletid repo)] 
+                   (-> (conn/new-connection-request conn-req)
+                       cr/save
+                       conn/attach wallet)))
 
   (route/not-found (File. "resources/public/not-found.html")))
 
