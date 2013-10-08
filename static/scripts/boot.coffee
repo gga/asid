@@ -6,7 +6,8 @@ require.config
     underscore:
       exports: '_'
 
-require ['asid'], (asid) ->
-  path = window.location.pathname
-  controller = asid.controllerFor(path)
-  controller.start() if controller
+require ['jquery', 'asid'], ($, asid) ->
+  $(document).ready ->
+    path = window.location.pathname
+    controller = asid.controllerFor(path)
+    controller.start() if controller
