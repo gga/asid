@@ -1,4 +1,4 @@
-|define(function (require, exports, module) {/*!
+define(function (require, exports, module) {/*!
 ICanHaz.js version 0.10 -- by @HenrikJoreteg
 More info at: http://icanhazjs.com
 */
