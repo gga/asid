@@ -25,9 +25,9 @@
 (defn- http-failed? [resp]
   (let [status (:status resp)]
     (cond
-     (some #{404 406} [status]) (bad-request "Remote endpoint did not understand request.")
-     (< 399 status 500) (unavailable)
-     (> status 500) (bad-gateway)
+     (some #{404 406} [status]) (ed/bad-request "Remote endpoint did not understand request.")
+     (< 399 status 500) (ed/unavailable)
+     (> status 500) (ed/bad-gateway)
      :else resp)))
 
 (defn- find-letterplate [card]
