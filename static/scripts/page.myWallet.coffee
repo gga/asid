@@ -27,6 +27,11 @@ define ['jquery', 'underscore', 'icanhaz'], ($, _, ich) ->
       handler($('input#poolName').val(), _.map($('.challengeEntry'), (ce) -> $(ce).val()))
       e.preventDefault()
 
+  onSign: (handler) ->
+    $('a.sign').on 'click', (e) ->
+      e.preventDefault()
+      handler(e.target.dataset.pool)
+
   render: (viewMsg) ->
     if _.has(viewMsg, 'wallet')
       $('.wallet').html(ich.walletTmpl(viewMsg.wallet))

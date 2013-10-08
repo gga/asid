@@ -36,6 +36,8 @@ define ['underscore',
       elseFailed: () ->
         console.log("Error! Couldn't create trust pool.")
 
+  myWalletPage.onSign (poolUri) ->
+
   launch: (walletUri) ->
     store.set('currentWalletUri', walletUri)
     navigator.changePage(walletUri)
