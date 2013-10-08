@@ -11,11 +11,35 @@
     .container
       .header
         %h1 asid
+        %h2 a secure, decentralized, trustable identity system
 
       .content
         .about-asid
+          %h2 About
+
+          %p
+            asid is a prototype proof-of-concept for a system of identity that is secure,
+            de-centralized and trustable. It's secure because if it isn't secure then it
+            isn't an identity system.
+
+          %p
+            It's decentralized because no identity relies on a single, central
+            authority. This has two primary benefits. Your identity is not at risk of breach
+            if someone else is breached. Your privacy is protected because you don't
+            have to provide all your details to some company or government.
+
+          %p
+            This is a prototype. It is intended to be implemented as native
+            apps for smartphones.
+
+          %p
+            asid is licensed under the
+            %a(href="http://www.gnu.org/licenses/agpl-3.0.html") GPL Affero v3
+            license. The
+            %a(href="http://github.com/gga/asid") source code is publicly available.
+
         .your-own-identity
-          %h2 Create your asid
+          %h2 Create your own asid
 
           %p
             Please provide some unique text to seed the creation or your identity. This
@@ -27,10 +51,11 @@
             stored anywhere.
 
           .create
-            %p.error
-            %input#id-seed(type="text")
-            %br
-            %a#new-identity(href="#") New Identity&hellip;
+            %form
+              %p.error
+              %input#id-seed(type="text")
+              %br
+              %a#new-identity(href="#") New Identity&hellip;
 
       .footer
         %p

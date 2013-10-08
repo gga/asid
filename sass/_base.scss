@@ -1,6 +1,8 @@
 // ---------------------------------------------------------------------------
 // Imports
 
+@import "blueprint";
+@import "blueprint/typography";
 @import "susy";
 
 // ---------------------------------------------------------------------------
@@ -11,8 +13,13 @@ $column-width   : 4em;
 $gutter-width   : 1em;
 $grid-padding   : $gutter-width;
 
-$show-grid-backgrounds  : true;
+$show-grid-backgrounds  : false;
 
 // Fonts
 $font-regular   : 'Alef', sans-serif;
 $font-fixed     : 'Inconsolata', sans-serif;
+
+$blueprint-font-family : $font-regular;
+$blueprint-fixed-font-family : $font-fixed;
+$blueprint-font-size: 18px;
+$blueprint-button-font-family: $font-regular;

@@ -2,7 +2,12 @@
 // Imports
 
 @import "base";
+@import "controls";
 @import "typography";
+
+@import "blueprint/buttons";
+
+@include blueprint-typography;
 
 /* -------------------------------------------------------------------------*/
 /* Layout */
@@ -12,9 +17,13 @@
   @include susy-grid-background;
 }
 
+.header h2 {
+  @include subheader;
+}
+
 .footer {
   @include span-columns($total-columns omega, $total-columns);
-  font-size: 0.5em;
+  font-size: 0.8em;
 }
 
 .about-asid {
@@ -25,6 +34,16 @@
   @include span-columns(6 omega, $total-columns);
 
   .create {
-    @include span-columns(3 omega, 6);
+    @include span-columns(5 omega, 6);
+
+    input {
+      width: 97%;
+      @include text-input;
+    }
+
+    a {
+      @include anchor-button;
+      @include span-columns(2 omega, 5);
+    }
   }
 }

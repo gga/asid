@@ -8,3 +8,9 @@ h1, h2, h3, h4, h5, h6 {
 code, pre {
   font-family: $font-fixed;
 }
+
+@mixin subheader {
+  font-size: 0.8em;
+  margin-top: -2.5em;
+  margin-left: 0.5em;
+}
