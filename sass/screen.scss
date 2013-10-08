@@ -2,6 +2,7 @@
 // Imports
 
 @import "base";
+@import "typography";
 
 /* -------------------------------------------------------------------------*/
 /* Layout */
@@ -9,4 +10,21 @@
 .container {
   @include container;
   @include susy-grid-background;
+}
+
+.footer {
+  @include span-columns($total-columns omega, $total-columns);
+  font-size: 0.5em;
+}
+
+.about-asid {
+  @include span-columns(6, $total-columns);
+}
+
+.your-own-identity {
+  @include span-columns(6 omega, $total-columns);
+
+  .create {
+    @include span-columns(3 omega, 6);
+  }
 }

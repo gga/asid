@@ -2,6 +2,8 @@
 %html
   %head
     %title asid: a decentralized, trustable identity system
+    %link(href="http://fonts.googleapis.com/css?family=Alef|Inconsolata" rel="stylesheet" type="text/css")
+    %link(rel="stylesheet" type="text/css" href="stylesheets/screen.css")
 
     %script(data-main="scripts/boot" src="scripts/require.js")
 
@@ -11,17 +13,25 @@
         %h1 asid
 
       .content
-        %p
-          Please provide some unique text to seed the creation or your identity. This
-          is used to help ensure your identity is globally unique. An email address
-          or a domain name is good.
-        %p
-          It is not possible
-          to extract this information out of the identity. And it will also not be
-          stored anywhere.
+        .about-asid
+        .your-own-identity
+          %h2 Create your asid
 
-        %p.error
-        %input#id-seed(type="text")
-        %a#new-identity(href="#") New Identity&hellip;
+          %p
+            Please provide some unique text to seed the creation or your identity. This
+            is used to help ensure your identity is globally unique. An email address
+            or a domain name is good.
+          %p
+            It is not possible
+            to extract this information out of the identity. And it will also not be
+            stored anywhere.
+
+          .create
+            %p.error
+            %input#id-seed(type="text")
+            %br
+            %a#new-identity(href="#") New Identity&hellip;
 
       .footer
+        %p
+          &copy; Giles Alexander, 2013 &mdash;
