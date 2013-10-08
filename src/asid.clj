@@ -26,7 +26,8 @@
             [asid.static :as as]
             [asid.response :as ar]
             [asid.trust-pool-repository :as tpr]
-            [asid.calling-card-repository :as ccr])
+            [asid.calling-card-repository :as ccr]
+            [asid.current-request :as req])
 
   (:import java.io.File))
 
@@ -98,6 +99,7 @@
 
 (def app
   (-> (handler/site main-routes)
+      req/capture-request
       jde/json-documents
       acn/accepts
       acn/vary-by-accept
