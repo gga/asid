@@ -1,12 +1,12 @@
 define ['jquery', 'underscore', 'icanhaz'], ($, _, ich) ->
 
   insertChallengeLine = () ->
-    $('form#addTrustPool .challenge').append(ich.challengeTmpl())
+    $('form#addTrustPool .challenge .pieces').append(ich.challengeTmpl())
 
   clear = () ->
     $('input#newKey').val('')
     $('input#newValue').val('')
-    $('form#addTrustPool .challenge').empty()
+    $('form#addTrustPool .challenge .pieces').empty()
     insertChallengeLine()
 
   initialize: () ->

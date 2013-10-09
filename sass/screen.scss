@@ -47,3 +47,114 @@
     }
   }
 }
+
+.wallet {
+  @include span-columns(6, $total-columns);
+
+  h3 {
+    @include subheader;
+  }
+
+  p.key {
+    @include pre(2);
+    @include span-columns(3, 6);
+
+    margin-top: 0.5em;
+    font-family: $font-fixed;
+    word-wrap: break-word;
+  }
+}
+
+label {
+  @include span-columns(1, 6);
+}
+
+.pools {
+  @include span-columns(6 omega, $total-columns);
+
+  h2 {
+   margin-bottom: 0.1em;
+  }
+
+  .entries {
+    margin-top: 1em;
+
+    .details {
+      @include span-columns(4, 6);
+
+      h3.poolName {
+        font-size: 1.1em;
+        margin-bottom: 1.5em;
+      }
+      h4.poolIdentity {
+        @include subheader;
+      }
+
+      p {
+        margin-top: -0.5em;
+        margin-bottom: 1em;
+      }
+    }
+
+    .controls {
+      @include span-columns(2 omega, 6);
+      a.sign {
+        @include anchor-button;
+        width: $column-width * 2;
+        text-align: center;
+        margin-top: 4em;
+      }
+    }
+  }
+
+  form#addTrustPool {
+    @include blueprint-inline-form;
+
+    .challenge {
+      @include span-columns(6 omega, 6);
+      .challengeControls {
+        @include span-columns(2 omega, 6);
+      }
+      .pieces {
+        @include span-columns(2, 6);
+        .challengeEntry {
+          @include text-input;
+        }
+      }
+    }
+
+    input#newPool {
+      @include button-button;
+      width: $column-width * 2;
+    }
+    input#addChallenge {
+      @include button-button;
+      width: $column-width * 2;
+    }
+
+    #poolName {
+      @include text-input;
+    }
+  }
+}
+
+.bag {
+  @include span-columns(6, $total-columns);
+
+  h2 {
+   margin-bottom: 0.1em;
+  }
+  form#addBagItem {
+    @include blueprint-inline-form;
+
+    input[type='text'] {
+      @include text-input;
+    }
+    .value {
+      input[type='submit'] {
+        @include button-button;
+        width: $column-width;
+      }
+    }
+  }
+}

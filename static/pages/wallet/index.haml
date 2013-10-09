@@ -2,14 +2,13 @@
 %html
   %head
     %title asid: a decentralized, trustable identity system
-    %link(href="http://fonts.googleapis.com/css?family=Alef|Inconsolata" rel="stylesheet" type="text/css")
     %link(rel="stylesheet" type="text/css" href="stylesheets/screen.css")
 
     %script(data-main="/scripts/boot" src="/scripts/require.js")
 
     %script#walletTmpl(type="text/html")
       %h3 {{ identity }}
-      %code {{ publicKey }}
+      %p.key {{ publicKey }}
 
     %script#bagTmpl(type="text/html")
       %table
@@ -29,14 +28,16 @@
         %input.challengeEntry(type="text")
 
     %script#trustPoolsTmpl(type="text/html")
-      %h3 {{ name }}
-      %br
-      %a.sign(href="#" data-pool="{{links.self}}") Connect&hellip;
-      %code {{ identity }}
-      %ol
-        {{#challenge}}
-        %li {{.}}
-        {{/challenge}}
+      .pool
+        .details
+          %h3.poolName {{ name }}
+          %h4.poolIdentity {{ identity }}
+          %p
+            {{#challenge}}
+            {{.}}
+            {{/challenge}}
+        .controls
+          %a.sign(href="#" data-pool="{{links.self}}") Connect&hellip;
 
   %body
     .container
@@ -46,26 +47,31 @@
       .content
         .wallet
           
-        %h2 Data
-        .bag
-          .controls
-            %form#addBagItem
-              %label(for="key") Key:
-              %input#newKey(type="text" name="key")
-              %label(for="value") Value:
-              %input#newValue(type="text" name="value")
-              %input(type="submit" value="Add")
-          .entries
-
-        %h2 Trust Pools
         .pools
+          %h2 Trust Pools
           .controls
             %form#addTrustPool
               %label(for="name") Name:
               %input#poolName(type="text" name="name")
-              %input(type="submit" value="New Pool")
+              %input#newPool(type="submit" value="New Pool")
               .challenge
-              %a#addChallenge(href="#") Another&hellip;
+                %label Challenge:
+                .challengeControls
+                  %input#addChallenge(type="button" value="Add")
+                .pieces
+          .entries
+
+        .bag
+          %h2 Data
+          .controls
+            %form#addBagItem
+              .key
+                %label(for="key") Key:
+                %input#newKey(type="text" name="key")
+              .value
+                %label(for="value") Value:
+                %input#newValue(type="text" name="value")
+                %input(type="submit" value="Add")
           .entries
 
       .footer
