@@ -63,6 +63,7 @@
 
         .bag
           %h2 Data
+          .entries
           .controls
             %form#addBagItem
               .key
@@ -72,7 +73,6 @@
                 %label(for="value") Value:
                 %input#newValue(type="text" name="value")
                 %input(type="submit" value="Add")
-          .entries
 
       .footer
         %p

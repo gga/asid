@@ -80,7 +80,8 @@ label {
     margin-top: 1em;
 
     .details {
-      @include span-columns(4, 6);
+      @include pre(1);
+      @include span-columns(3, 6);
 
       h3.poolName {
         font-size: 1.1em;
@@ -153,7 +154,7 @@ label {
     .value {
       input[type='submit'] {
         @include button-button;
-        width: $column-width;
+        width: $column-width * 2;
       }
     }
   }
