@@ -17,6 +17,17 @@
   @include susy-grid-background;
 }
 
+form {
+  @include blueprint-inline-form;
+}
+input[type="text"] {
+  @include text-input;
+}
+input[type="submit"], input[type="button"] {
+  @include button-button;
+  width: $column-width * 2;
+}
+
 .header h2 {
   @include subheader;
 }
@@ -38,12 +49,12 @@
 
     input {
       width: 97%;
-      @include text-input;
     }
 
     a {
       @include anchor-button;
       @include span-columns(2 omega, 5);
+      text-align: center;
     }
   }
 }
@@ -109,8 +120,6 @@ label {
   }
 
   form#addTrustPool {
-    @include blueprint-inline-form;
-
     .challenge {
       @include span-columns(6 omega, 6);
       .challengeControls {
@@ -118,23 +127,7 @@ label {
       }
       .pieces {
         @include span-columns(2, 6);
-        .challengeEntry {
-          @include text-input;
-        }
       }
-    }
-
-    input#newPool {
-      @include button-button;
-      width: $column-width * 2;
-    }
-    input#addChallenge {
-      @include button-button;
-      width: $column-width * 2;
-    }
-
-    #poolName {
-      @include text-input;
     }
   }
 }
@@ -144,18 +137,5 @@ label {
 
   h2 {
    margin-bottom: 0.1em;
-  }
-  form#addBagItem {
-    @include blueprint-inline-form;
-
-    input[type='text'] {
-      @include text-input;
-    }
-    .value {
-      input[type='submit'] {
-        @include button-button;
-        width: $column-width * 2;
-      }
-    }
   }
 }
