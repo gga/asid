@@ -12,18 +12,24 @@ define ['underscore',
       publicKey: wallet.key.public
       bag: _.map(_.keys(wallet.bag), (k) -> key: k, value: wallet.bag[k])
 
-  displayCurrentWallet = () ->
+  displayCurrentWalletData = () ->
     myWalletPage.render(presentWallet(currentWallet))
+
+  displayTrustPools = () ->
     _.each currentWallet.links.trustpools, (tpUri) ->
       trustPoolRepo.get tpUri,
         ifSucceeded: (pool) ->
           myWalletPage.render(addTrustPool: pool)
 
+  displayCurrentWallet = () ->
+    displayCurrentWalletData()
+    displayTrustPools()
+
   myWalletPage.onAddBagItem (key, value) ->
     walletRepo.addBagItem currentWallet.links.bag, key, value,
       ifSucceeded: (updatedWallet) ->
         currentWallet = updatedWallet
-        displayCurrentWallet()
+        displayCurrentWalletData()
         myWalletPage.render(reset: true)
 
   myWalletPage.onAddChallenge(() -> myWalletPage.render(addChallengeLine: true))
