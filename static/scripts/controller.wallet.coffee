@@ -49,9 +49,12 @@ define ['underscore',
     myWalletPage.render(removePoolConnDetails: poolUri)
 
   myWalletPage.onConnectConfirm (poolUri, identity, identityUri) ->
-    console.log(poolUri)
-    console.log(identity);
-    console.log(identityUri);
+    trustPoolRepo.connect poolUri, identity, identityUri,
+      ifSucceeded: (cardUri, card) ->
+        console.log("Successfully left calling card.")
+        console.log(cardUri)
+      elseFailed: ->
+        console.log("Error! Couldn't leave calling card with other party.")
 
   launch: (walletUri) ->
     store.set('currentWalletUri', walletUri)
