@@ -43,6 +43,15 @@ define ['underscore',
         console.log("Error! Couldn't create trust pool.")
 
   myWalletPage.onSign (poolUri) ->
+    myWalletPage.render(displayPoolConnDetails: poolUri)
+
+  myWalletPage.onConnectCancel (poolUri) ->
+    myWalletPage.render(removePoolConnDetails: poolUri)
+
+  myWalletPage.onConnectConfirm (poolUri, identity, identityUri) ->
+    console.log(poolUri)
+    console.log(identity);
+    console.log(identityUri);
 
   launch: (walletUri) ->
     store.set('currentWalletUri', walletUri)

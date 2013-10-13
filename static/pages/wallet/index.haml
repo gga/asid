@@ -36,8 +36,23 @@
             {{#challenge}}
             {{.}}
             {{/challenge}}
+          .dialog(id="{{links.self}}")
         .controls
           %a.sign(href="#" data-pool="{{links.self}}") Connect&hellip;
+
+    %script#poolConnectionTmpl(type="text/html")
+      .connectionDialog
+        %form
+          %input.poolUri(type="hidden" value="{{ uri }}" name="uri")
+          .identity
+            %label(for="identity") Id:
+            %input.connIdentity(type="text" name="identity")
+          .uri
+            %label(for="identityUri") URI:
+            %input.connUri(type="text" name="identityUri")
+          .controls
+            %input.cancel(type="button" value="Cancel")
+            %input.connect(type="button" value="Connect")
 
   %body
     .container

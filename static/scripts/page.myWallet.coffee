@@ -18,19 +18,32 @@ define ['jquery', 'underscore', 'icanhaz'], ($, _, ich) ->
       e.preventDefault()
 
   onAddChallenge: (handler) ->
-    $('#addChallenge').on 'click', (e) ->
+    $(document).on 'click', '#addChallenge', (e) ->
       handler()
       e.preventDefault()
 
   onAddTrustPool: (handler) ->
-    $('form#addTrustPool').on 'submit', (e) ->
+    $(document).on 'submit', 'form#addTrustPool', (e) ->
       handler($('input#poolName').val(), _.map($('.challengeEntry'), (ce) -> $(ce).val()))
       e.preventDefault()
 
   onSign: (handler) ->
-    $('a.sign').on 'click', (e) ->
+    $(document).on 'click', 'a.sign', (e) ->
       e.preventDefault()
       handler(e.target.dataset.pool)
+
+  onConnectCancel: (handler) ->
+    $(document).on 'click', '.connectionDialog .cancel', (e) ->
+      e.preventDefault()
+      handler($(e.target).parents('form').children('.poolUri').val())
+
+  onConnectConfirm: (handler) ->
+    $(document).on 'click', '.connectionDialog .connect', (e) ->
+      e.preventDefault()
+      connForm = $(e.target).parents('form')
+      handler($('.poolUri', connForm).val(),
+              $('.connIdentity', connForm).val(),
+              $('.connUri', connForm).val())
 
   render: (viewMsg) ->
     if _.has(viewMsg, 'wallet')
@@ -40,5 +53,10 @@ define ['jquery', 'underscore', 'icanhaz'], ($, _, ich) ->
       insertChallengeLine()
     if _.has(viewMsg, 'addTrustPool')
       $('.pools .entries').append(ich.trustPoolsTmpl(viewMsg.addTrustPool))
+    if _.has(viewMsg, 'displayPoolConnDetails')
+      poolUri = viewMsg.displayPoolConnDetails
+      $(".dialog[id='#{poolUri}']").html(ich.poolConnectionTmpl(uri: poolUri))
+    if _.has(viewMsg, 'removePoolConnDetails')
+      $(".dialog[id='#{viewMsg.removePoolConnDetails}']").empty()
     if _.has(viewMsg, 'reset')
       clear()

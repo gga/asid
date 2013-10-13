@@ -6,7 +6,6 @@ define ['page.home',
       if idSeed.length > 0
         walletRepo.create idSeed,
           ifSucceeded: (uri) ->
-            console.log(uri)
             walletController.launch(uri)
 
           elseFailed: ->

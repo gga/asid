@@ -17,6 +17,15 @@
   @include susy-grid-background;
 }
 
+table {
+  thead {
+    th {
+      color: white;
+      background-color: $colour2;
+    }
+  }
+}
+
 form {
   @include blueprint-inline-form;
 }
@@ -105,6 +114,29 @@ label {
       p {
         margin-top: -0.5em;
         margin-bottom: 1em;
+      }
+
+      .dialog {
+        .connectionDialog {
+          @include span-columns(3, 3);
+          background-color: $dialog-colour;
+          height: 205px;
+          padding: 0.5em;
+        }
+
+        .identity, .uri {
+          @include span-columns(3, 3);
+        }
+        label {
+          text-align: right;
+        }
+        input[type="text"] {
+          @include span-columns(2 omega, 3);
+        }
+        .controls {
+          @include pre(1);
+          @include span-columns(2 omega, 3);
+        }
       }
     }
 
