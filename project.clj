@@ -10,10 +10,10 @@
                  [bouncycastle/bcprov-jdk16 "140"]
                  [clojurewerkz/neocons "1.1.0"]
                  [clj-http "0.7.7"]
-                 [org.clojure/algo.monads "0.1.4"]]
-  :profiles {:dev {:dependencies [[midje "1.5.0"]
-                                  [lein-midje "3.0.0"]
-                                  [ring-mock "0.1.5"]]}}
+                 [org.clojure/algo.monads "0.1.4"]
+                 [midje "1.5.0"]
+                 [lein-midje "3.0.0"]
+                 [ring-mock "0.1.5"]]
 
   :ring {:handler asid/app})
   

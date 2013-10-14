@@ -4,3 +4,4 @@
 /resources/public/*.html
 /resources/public/scripts/*.js
 /resources/public/**/*.html
+/package

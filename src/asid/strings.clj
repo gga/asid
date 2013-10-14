@@ -26,3 +26,6 @@
 
 (fact
   (resolve-url "/hello" "http://localhost:8888/hfdf-45fd") => "http://localhost:8888/hello")
+
+(defn getenv [key default]
+  (get (System/getenv) key default))
