@@ -1,6 +1,5 @@
 (ns asid
   (:use compojure.core
-        ring.middleware.resource
         ring.middleware.file-info
         ring.util.response
         midje.sweet
@@ -26,12 +25,11 @@
             [asid.json-doc-exchange :as jde]
             [asid.static :as as]
             [asid.current-request :as req]
+            [asid.file-resource :as afr]
             [asid.response :as ar]
             [asid.trust-pool-repository :as tpr]
             [asid.calling-card-repository :as ccr]
-            [asid.connection-request-repository :as cr])
-
-  (:import java.io.File))
+            [asid.connection-request-repository :as cr]))
 
 (def repo (an/initialize!))
 
@@ -47,7 +45,7 @@
 
   (GET ["/:id", :id aid/grammar] [id :as {accepts :accepts}]
        (let [content {"text/html"
-                      (fn [] (File. "resources/public/wallet/index.html"))
+                      (fn [] (afr/file-resource "wallet/index.html"))
 
                       "application/vnd.org.asidentity.wallet+json"
                       (fn [] (fail->
@@ -103,7 +101,7 @@
                        cr/save
                        conn/attach wallet)))
 
-  (route/not-found (File. "resources/public/not-found.html")))
+  (route/not-found (afr/file-resource "not-found.html")))
 
 (def app
   (-> (handler/site main-routes)
@@ -111,7 +109,7 @@
       jde/json-documents
       acn/accepts
       acn/vary-by-accept
-      (wrap-resource "public")
+      afr/resources
       wrap-file-info
       as/static-dir-index))
 
