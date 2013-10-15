@@ -2,8 +2,7 @@ define ['underscore',
         'repository.wallet',
         'repository.trustPool',
         'page.myWallet',
-        'store',
-        'navigator'], (_, walletRepo, trustPoolRepo, myWalletPage, store, navigator) ->
+        'navigator'], (_, walletRepo, trustPoolRepo, myWalletPage, navigator) ->
   currentWallet = null
 
   presentWallet = (wallet) ->
@@ -57,12 +56,11 @@ define ['underscore',
         console.log("Error! Couldn't leave calling card with other party.")
 
   launch: (walletUri) ->
-    store.set('currentWalletUri', walletUri)
     navigator.changePage(walletUri)
 
   start: () ->
     myWalletPage.initialize()
-    walletRepo.get store.get('currentWalletUri'),
+    walletRepo.get navigator.currentPage(),
       ifSucceeded: (data) ->
         currentWallet = data
         displayCurrentWallet()
