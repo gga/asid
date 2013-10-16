@@ -11,6 +11,10 @@
                  [clojurewerkz/neocons "1.1.0"]
                  [clj-http "0.7.7"]
                  [org.clojure/algo.monads "0.1.4"]
+
+                 [org.clojure/tools.logging "0.2.6"]
+                 [log4j/log4j "1.2.17"]
+
                  [midje "1.5.0"]
                  [lein-midje "3.0.0"]
                  [ring-mock "0.1.5"]]

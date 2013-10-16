@@ -12,7 +12,8 @@
             [clojure.string :as cs]
             [ring.mock.request :as mr])
 
-  (:require [asid.neo :as an]
+  (:require [asid.log :as log] 
+            [asid.neo :as an]
             [asid.identity :as aid]
             [asid.trust-pool :as tp]
             [asid.wallet :as w]
@@ -105,13 +106,15 @@
 
 (def app
   (-> (handler/site main-routes)
+      log/inbound-request
       req/capture-request
       jde/json-documents
       acn/accepts
       acn/vary-by-accept
       afr/resources
       wrap-file-info
-      as/static-dir-index))
+      as/static-dir-index
+      log/outbound-response))
 
 (fact "/"
   (:status (app (mr/request :get "/"))) => 200)
