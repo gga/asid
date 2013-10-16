@@ -61,20 +61,28 @@
 
       .content
         .wallet
+
+        .detail
+          %ul
+            %li
+              %a.current Trust Pools
+            %li
+              %a Cards
+            %li
+              %a Requests
           
-        .pools
-          %h2 Trust Pools
-          .controls
-            %form#addTrustPool
-              %label(for="name") Name:
-              %input#poolName(type="text" name="name")
-              %input#newPool(type="submit" value="New Pool")
-              .challenge
-                %label Challenge:
-                .challengeControls
-                  %input#addChallenge(type="button" value="Add")
-                .pieces
-          .entries
+          .pools
+            .controls
+              %form#addTrustPool
+                %label(for="name") Name:
+                %input#poolName(type="text" name="name")
+                %input#newPool(type="submit" value="New Pool")
+                .challenge
+                  %label Challenge:
+                  .challengeControls
+                    %input#addChallenge(type="button" value="Add")
+                  .pieces
+            .entries
 
         .bag
           %h2 Data

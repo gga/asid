@@ -1,0 +1,44 @@
+/* root element for tabs  */
+@mixin tabs {
+  margin: 0 !important;
+  padding: 0;
+  height: 2em;
+  border-bottom: 2px solid #ddd;
+
+  li {
+    float: left;
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+  }
+
+  a {
+    float: left;
+    font-size: 1.3em;
+    display: block;
+    padding: 5px 30px;
+    text-decoration: none;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-bottom: 0px;
+    height: 1em;
+    background-color: #efefef;
+    color: #777;
+    margin-right: 2px;
+    position: relative;
+    top: 1px;
+    min-width: 40px;
+  }
+
+  a:hover {
+    background-color: #F7F7F7;
+    color: #333;
+  }
+
+  a.current {
+    background-color: #ddd;
+    border-bottom: 2px solid #ddd;
+    color: #000;
+    cursor: default;
+  }
+}

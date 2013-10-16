@@ -4,6 +4,7 @@
 @import "base";
 @import "controls";
 @import "typography";
+@import "tabs";
 
 @import "blueprint/buttons";
 
@@ -89,13 +90,15 @@ label {
   @include span-columns(1, 6);
 }
 
-.pools {
+.detail {
   @include span-columns(6 omega, $total-columns);
 
-  h2 {
-   margin-bottom: 0.1em;
+  ul {
+    @include tabs;
   }
+}
 
+.pools {
   .entries {
     margin-top: 1em;
 
