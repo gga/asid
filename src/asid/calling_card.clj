@@ -46,7 +46,7 @@
            :initiator (req/url-relative-to-request (w/uri wallet))}})
 
 (defn- seek-introduction [intro card wallet pool]
-  (fail-> (as/resolve-url (-> :links :letterplate intro) (:target-uri card))
+  (fail-> (as/resolve-url (-> intro :links :letterplate) (:target-uri card))
           (http/post {:body (json/write-str (connection-request card wallet pool))
                       :content-type "vnd/application.org.asidentity.connection-request+json"})
           http-failed?
@@ -65,7 +65,9 @@
   card)
 
 (defn self-link [so-far card]
-  (conj so-far [:self (uri card)]))
+  (let [pool (an/parent-object card :adds-identity)
+        wallet (an/parent-object pool :trustpool)]
+    (conj so-far [:self (uri card wallet)])))
 
 (extend-type CallingCard
   render/Linked

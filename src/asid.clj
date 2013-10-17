@@ -73,9 +73,9 @@
 
   (POST ["/:id/trustpool", :id aid/grammar] [id :as {pool-doc :json-doc}]
         (dofailure
-         [data (validate! pool-doc :not-empty "name")
-          name (get data "name")
-          challenge-keys (get data "challenge")
+         [data (validate! pool-doc :not-empty :name)
+          name (name :data)
+          challenge-keys (:challenge data)
           pool (tpr/save (tp/new-trust-pool name challenge-keys) repo)
           wallet (wr/get-wallet id repo)
           conn (an/connect-nodes wallet pool :trustpool)]
@@ -89,18 +89,19 @@
   (POST "/:walletid/trustpool/:poolid" [walletid poolid :as {calling-card :json-doc}]
         (dofailure [wallet (wr/get-wallet walletid repo)
                     pool (tpr/pool-from-wallet wallet poolid)]
-                   (fail-> (cc/new-calling-card (:identity calling-card)
-                                                (:uri calling-card))
+                   (fail-> (cc/new-calling-card (:uri calling-card)
+                                                (:identity calling-card))
                            (cc/submit wallet pool)
                            ccr/save
                            (cc/attach pool)
-                           (ar/created "application/vnd.org.asidentity.calling-card+json"))))
+                           ar/created)))
 
-  (POST ["/:id/letterplate", :id aid/grammar] [walletid :as {conn-req :json-doc}]
-        (dofailure [wallet (wr/get-wallet walletid repo)] 
-                   (-> (conn/new-connection-request conn-req)
-                       cr/save
-                       conn/attach wallet)))
+  (POST ["/:id/letterplate", :id aid/grammar] [id :as {conn-req :json-doc}]
+        (dofailure [wallet (wr/get-wallet id repo)] 
+                   (fail-> (conn/new-connection-request conn-req)
+                           cr/save
+                           (conn/attach wallet)
+                           ar/created)))
 
   (route/not-found (afr/file-resource "not-found.html")))
 
