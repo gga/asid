@@ -19,3 +19,7 @@
 
 (defn vary-by-accept [handler]
   #(header (handler %) "Vary" "Accept"))
+
+(defn by-content [accepts content-map]
+  (let [handler (first (remove nil? (map content-map accepts)))]
+    (handler)))

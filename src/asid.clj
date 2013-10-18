@@ -42,22 +42,19 @@
                   (wr/save repo)
                   ar/created)))
 
-  (GET ["/:id", :id aid/grammar] [id :as {accepts :accepts}]
-       (let [content {"text/html"
-                      (fn [] (afr/file-resource "wallet/index.html"))
+  (GET ["/:id", :id aid/grammar] [id :as {accepted :accepts}]
+       (acn/by-content accepted
+                       {"text/html"
+                        (fn [] (afr/file-resource "wallet/index.html"))
 
-                      "application/vnd.org.asidentity.wallet+json"
-                      (fn [] (fail->
-                              (wr/get-wallet id repo)
-                              ar/resource))
+                        "application/vnd.org.asidentity.wallet+json"
+                        (fn [] (fail-> (wr/get-wallet id repo)
+                                       ar/resource))
 
-                      "application/vnd.org.asidentity.introduction+json"
-                      (fn [] (fail-> (wr/get-wallet id repo)
-                                     (i/intro-to-wallet)
-                                     ar/resource))}
-
-             handler (first (remove nil? (map content accepts)))]
-         (handler)))
+                        "application/vnd.org.asidentity.introduction+json"
+                        (fn [] (fail-> (wr/get-wallet id repo)
+                                       (i/intro-to-wallet)
+                                       ar/resource))}))
 
   (POST ["/:id/bag", :id aid/grammar] [id key value]
         (fail-> {"id" id, "key" key, "value" value}
