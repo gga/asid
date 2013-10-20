@@ -1,4 +1,4 @@
-(ns asid.neo
+(ns asid.nodes
   (:require [asid.strings :as as]
             [clojurewerkz.neocons.rest :as nr]
             [clojurewerkz.neocons.rest.nodes :as nn]

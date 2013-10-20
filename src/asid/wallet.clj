@@ -4,7 +4,7 @@
 
   (:require [clojure.data.json :as json]
             [asid.identity :as aid]
-            [asid.neo :as an]
+            [asid.nodes :as an]
             [asid.render :as render])
 
   (:import [org.bouncycastle.jce.provider BouncyCastleProvider]

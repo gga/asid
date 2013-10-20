@@ -1,5 +1,5 @@
 (ns asid.connection-request
-  (:require [asid.neo :as an]
+  (:require [asid.nodes :as an]
             [asid.render :as render]
             [asid.identity :as aid]
             [asid.wallet :as w]))

@@ -5,16 +5,16 @@
   (:require [clojure.data.json :as json]
             [ring.mock.request :as mr])
 
-  (:require [asid.neo :as an]
+  (:require [asid.nodes :as an]
             [asid.trust-pool :as tp]
             [asid.trust-pool-repository :as tpr]
             [asid.wallet :as w]
             [asid.wallet.repository :as wr]))
 
-(fact "/"
+(fact "GET /"
   (:status (app (mr/request :get "/"))) => 200)
 
-(fact "/identity"
+(fact "POST /identity"
   (let [req (app (-> (mr/request :post "/identity")
                      (mr/body "sample-id-seed")))]
     (:status req) => 201
@@ -23,7 +23,7 @@
                      (mr/body "")))]
     (:status req) => 400))
 
-(fact "/<wallet-id>"
+(fact "GET /<wallet-id>"
   (let [req (app (-> (mr/request :get "/bada-bada-bada-1d")
                      (mr/header "Accept" "application/vnd.org.asidentity.wallet+json")))]
     (:status req) => 404
@@ -39,19 +39,19 @@
     (:status req) => 200
     (-> intro-doc (get "bag")) => nil?))
 
-(fact "/<wallet-id>/bag"
+(fact "POST /<wallet-id>/bag"
   (let [wallet (wr/save (w/new-wallet "seed") repo)
         req (app (mr/request :post (w/bag-uri wallet) {"key" "key1" "value" "new-value"}))]
     (:status req) => 200))
 
-(fact "/<wallet-id>/trustpool"
+(fact "POST /<wallet-id>/trustpool"
   (let [wallet (wr/save (w/new-wallet "seed") repo)
         req (app (-> (mr/request :post (w/trustpool-uri wallet)
                                  (json/write-str {:name "hello" :challenge ["name"]}))
                      (mr/header "Content-Type" "application/vnd.org.asidentity.trust-pool+json")))]
     (:status req) => 201))
 
-(fact "/<wallet-id>/trustpool/<pool-id>"
+(fact "GET /<wallet-id>/trustpool/<pool-id>"
   (let [wallet (wr/save (w/new-wallet "seed") repo)
         pool (tpr/save (tp/new-trust-pool "pool" ["name" "dob"]) repo)]
     (an/connect-nodes wallet pool :trustpool)
@@ -62,4 +62,5 @@
                        (mr/header "Accept" "application/vnd.org.asidentity.trust-pool+json")))]
       (:status req) => 404
       (:body req) => "Not found.")))
+
 

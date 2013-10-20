@@ -1,7 +1,7 @@
 (ns asid.wallet.links
   (:use midje.sweet)
 
-  (:require [asid.neo :as an]
+  (:require [asid.nodes :as an]
             [asid.trust-pool :as tp]
             [asid.wallet :as w]
             [asid.render :as render])

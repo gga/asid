@@ -5,7 +5,7 @@
   (:require [clojure.data.json :as json]
             [asid.identity :as aid]
             [asid.wallet :as w]
-            [asid.neo :as an]
+            [asid.nodes :as an]
             [asid.strings :as as]
             [asid.render :as render]
             [asid.error.definition :as ed]

@@ -11,7 +11,7 @@
             [clojure.string :as cs])
 
   (:require [asid.log :as log] 
-            [asid.neo :as an]
+            [asid.nodes :as an]
             [asid.identity :as aid]
             [asid.trust-pool :as tp]
             [asid.wallet :as w]
@@ -67,14 +67,13 @@
                 ar/resource))
 
   (POST ["/:id/trustpool", :id aid/grammar] [id :as {pool-doc :json-doc}]
-        (dofailure
-         [data (validate! pool-doc :not-empty :name)
-          name (name :data)
-          challenge-keys (:challenge data)
-          pool (tpr/save (tp/new-trust-pool name challenge-keys) repo)
-          wallet (wr/get-wallet id repo)
-          conn (an/connect-nodes wallet pool :trustpool)]
-         (ar/created pool)))
+        (dofailure [data (validate! pool-doc :not-empty :name)
+                    name (name :data)
+                    challenge-keys (:challenge data)
+                    pool (tpr/save (tp/new-trust-pool name challenge-keys) repo)
+                    wallet (wr/get-wallet id repo)
+                    conn (an/connect-nodes wallet pool :trustpool)]
+                   (ar/created pool)))
 
   (GET "/:walletid/trustpool/:poolid" [walletid poolid]
        (fail-> (wr/get-wallet walletid repo)

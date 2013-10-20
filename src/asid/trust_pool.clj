@@ -3,7 +3,7 @@
 
   (:require [asid.wallet :as w]
             [asid.identity :as aid]
-            [asid.neo :as an]
+            [asid.nodes :as an]
             [asid.render :as render]))
 
 (defrecord TrustPool [name identity challenge])
