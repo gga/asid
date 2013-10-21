@@ -28,13 +28,14 @@
   wallet)
 
 (defn save [wallet ctxt]
-  (if (:node-id wallet)
+  (if (an/has-node? wallet)
     (update wallet)
-    (let [node (nn/create {:identity (:identity wallet)})]
+    (let [wallet (an/associate-node wallet
+                                    (an/create-node {:identity (:identity wallet)}))]
       (doseq [data [:bag :signatures :key]]
-        (an/attach-to-node node data (get wallet data)))
-      (nrl/create (:root ctxt) node :wallet)
-      (conj wallet [:node-id (:id node)]))))
+        (an/attach-to-node wallet data (get wallet data)))
+      (nrl/create (:root ctxt) (:node-id wallet) :wallet)
+      wallet)))
 
 (defn get-wallet [id ctxt]
   (let [results (cy/tquery (str "START asid=node({root}) "

@@ -1,17 +1,16 @@
 (ns asid.trust-pool-repository
-  (:require [clojurewerkz.neocons.rest :as nr]
+  (:require [asid.nodes :as an]
             [clojurewerkz.neocons.rest.nodes :as nn]
-            [clojurewerkz.neocons.rest.relationships :as nrl]
             [clojurewerkz.neocons.rest.cypher :as cy]
             [asid.error.definition :as ed])
 
   (:import [asid.trust_pool TrustPool]))
 
 (defn save [pool ctxt]
-  (let [node (nn/create {:identity (:identity pool)
-                         :name (:name pool)
-                         :challenge (:challenge pool)})]
-    (conj pool [:node-id (:id node)])))
+  (an/associate-node pool
+                     (an/create-node {:identity (:identity pool)
+                                      :name (:name pool)
+                                      :challenge (:challenge pool)})))
 
 (defn pool-from-node [node]
   (conj (TrustPool. (-> node :data :name)

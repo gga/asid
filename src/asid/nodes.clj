@@ -15,12 +15,21 @@
           (nrl/create root asid-root :asid)
           {:root asid-root})))))
 
+(defn create-node [data-map]
+  (:id (nn/create data-map)))
+
+(defn associate-node [data-map node]
+  (conj data-map [:node-id node]))
+
+(defn has-node? [obj-or-map]
+  (:node-id obj-or-map))
+
 (defn connect-nodes [from to link]
   (nrl/create (:node-id from) (:node-id to) link))
 
-(defn attach-to-node [node link data]
+(defn attach-to-node [obj link data]
   (let [data-node (nn/create data)]
-        (nrl/create node data-node link)))
+        (nrl/create (:node-id obj) data-node link)))
 
 (defn- nodes-by-direction [start type dir which-end]
   (remove nil? (map #(if-let [end-node (-> % which-end)]
