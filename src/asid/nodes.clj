@@ -1,8 +1,14 @@
 (ns asid.nodes
   (:require [asid.strings :as as]
+            [asid.error.definition :as ed]
             [clojurewerkz.neocons.rest :as nr]
             [clojurewerkz.neocons.rest.nodes :as nn]
-            [clojurewerkz.neocons.rest.relationships :as nrl]))
+            [clojurewerkz.neocons.rest.relationships :as nrl]
+            [clojurewerkz.neocons.rest.cypher :as cy]))
+
+(defn- build-context [root-node]
+  {:root root-node
+   :node-id (:id root-node)})
 
 (defn initialize! []
   (let [neo-host (as/getenv "NEO4J_URL" "http://localhost:7474")]
@@ -10,10 +16,10 @@
     (let [root (nn/get 0)
           asid-rels (nrl/outgoing-for root :types [:asid])]
       (if (seq asid-rels)
-        {:root (-> asid-rels first :end nn/fetch-from)}
+        (build-context (-> asid-rels first :end nn/fetch-from))
         (let [asid-root (nn/create {:name "asid root"})]
           (nrl/create root asid-root :asid)
-          {:root asid-root})))))
+          (build-context asid-root))))))
 
 (defn create-node [data-map]
   (:id (nn/create data-map)))
@@ -59,3 +65,19 @@
 
 (defn parent-object [start type]
   (first (parent-objects start type)))
+
+(defn node-with-identity [origin rel identity]
+  (let [results (cy/tquery (str "START origin=node({originnode}) "
+                                "MATCH origin-[" rel "]->dest "
+                                "WHERE dest.identity = {destid} "
+                                "RETURN dest")
+                           {:originnode (:node-id origin)
+                            :rel rel
+                            :destid identity})]
+    (if (not (empty? results))
+      (-> results
+          first
+          (get "dest")
+          :self
+          nn/fetch-from)
+      (ed/not-found))))

@@ -1,7 +1,8 @@
 (ns asid.wallet.repository
+  (:use [asid.error.thread :only [fail->]])
+
   (:require [clojurewerkz.neocons.rest.nodes :as nn]
             [clojurewerkz.neocons.rest.relationships :as nrl]
-            [clojurewerkz.neocons.rest.cypher :as cy]
             [asid.nodes :as an]
             [asid.error.definition :as ed])
 
@@ -38,17 +39,5 @@
       wallet)))
 
 (defn get-wallet [id ctxt]
-  (let [results (cy/tquery (str "START asid=node({root}) "
-                                "MATCH asid-[:wallet]->wallet "
-                                "WHERE wallet.identity = {walletid} "
-                                "RETURN wallet")
-                           {:root (-> ctxt :root :id)
-                            :walletid id})]
-    (if (not (empty? results))
-      (-> results
-         first
-         (get "wallet")
-         :self
-         nn/fetch-from
-         wallet-from-node)
-      (ed/not-found))))
+  (fail-> (an/node-with-identity ctxt :wallet id)
+          wallet-from-node))

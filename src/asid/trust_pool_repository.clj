@@ -1,8 +1,7 @@
 (ns asid.trust-pool-repository
-  (:require [asid.nodes :as an]
-            [clojurewerkz.neocons.rest.nodes :as nn]
-            [clojurewerkz.neocons.rest.cypher :as cy]
-            [asid.error.definition :as ed])
+  (:use [asid.error.thread :only [fail->]])
+
+  (:require [asid.nodes :as an])
 
   (:import [asid.trust_pool TrustPool]))
 
@@ -19,17 +18,5 @@
         [:node-id (:id node)]))
 
 (defn pool-from-wallet [wallet poolid]
-  (let [results (cy/tquery (str "START wallet=node({walletnode}) "
-                                "MATCH wallet-[:trustpool]->pool "
-                                "WHERE pool.identity = {poolid} "
-                                "RETURN pool")
-                           {:walletnode (:node-id wallet)
-                            :poolid poolid})]
-    (if (not (empty? results))
-      (-> results
-          first
-          (get "pool")
-          :self
-          nn/fetch-from
-          pool-from-node)
-      (ed/not-found))))
+  (fail-> (an/node-with-identity wallet :trustpool poolid)
+          pool-from-node))
