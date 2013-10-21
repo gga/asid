@@ -1,8 +1,7 @@
 (ns asid.wallet.repository
   (:use [asid.error.thread :only [fail->]])
 
-  (:require [clojurewerkz.neocons.rest.relationships :as nrl]
-            [asid.nodes :as an]
+  (:require [asid.nodes :as an]
             [asid.error.definition :as ed])
 
   (:import [asid.wallet Wallet]))
@@ -33,7 +32,7 @@
                                     (an/create-node {:identity (:identity wallet)}))]
       (doseq [data [:bag :signatures :key]]
         (an/attach-to-node wallet data (get wallet data)))
-      (nrl/create (:root ctxt) (:node-id wallet) :wallet)
+      (an/connect-nodes ctxt wallet :wallet)
       wallet)))
 
 (defn get-wallet [id ctxt]
