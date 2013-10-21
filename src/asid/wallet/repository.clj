@@ -12,11 +12,11 @@
   (let [bag-node (an/sub-node node :bag)
         sig-node (an/sub-node node :signatures)
         key-node (an/sub-node node :key)]
-    (assoc (Wallet. (-> node :data :identity)
-                    (:data bag-node)
-                    (:data sig-node)
-                    (:data key-node))
-      :node-id (:id node))))
+    (an/associate-node (Wallet. (-> node :data :identity)
+                                (:data bag-node)
+                                (:data sig-node)
+                                (:data key-node))
+                       (:id node))))
 
 (defn- update [wallet]
   (nn/update (:node-id wallet) {:identity (:identity wallet)})

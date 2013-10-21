@@ -72,7 +72,6 @@
                                 "WHERE dest.identity = {destid} "
                                 "RETURN dest")
                            {:originnode (:node-id origin)
-                            :rel rel
                             :destid identity})]
     (if (not (empty? results))
       (-> results
