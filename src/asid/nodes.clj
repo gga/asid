@@ -30,6 +30,9 @@
 (defn has-node? [obj-or-map]
   (:node-id obj-or-map))
 
+(defn update-node [obj data]
+  (nn/update (:node-id obj) data))
+
 (defn connect-nodes [from to link]
   (nrl/create (:node-id from) (:node-id to) link))
 
@@ -55,8 +58,12 @@
 
 (defn sub-objects [start type]
   (if-let [node-id (:node-id start)]
-    (map :data (sub-nodes {:id node-id} type))
+    (map #(conj (:data %) [:node-id (:id %)]) 
+         (sub-nodes {:id node-id} type))
     []))
+
+(defn sub-object [start type]
+  (first (sub-objects start type)))
 
 (defn parent-objects [start type]
   (if-let [node-id (:node-id start)]

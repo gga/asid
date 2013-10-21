@@ -1,8 +1,7 @@
 (ns asid.wallet.repository
   (:use [asid.error.thread :only [fail->]])
 
-  (:require [clojurewerkz.neocons.rest.nodes :as nn]
-            [clojurewerkz.neocons.rest.relationships :as nrl]
+  (:require [clojurewerkz.neocons.rest.relationships :as nrl]
             [asid.nodes :as an]
             [asid.error.definition :as ed])
 
@@ -19,13 +18,12 @@
                        (:id node))))
 
 (defn- update [wallet]
-  (nn/update (:node-id wallet) {:identity (:identity wallet)})
-  (let [wallet-node (nn/get (:node-id wallet))
-        keys [:bag :signatures :key]]
+  (an/update-node wallet {:identity (:identity wallet)})
+  (let [keys [:bag :signatures :key]]
     (doseq [[node data] (map list
-                             (map #(an/sub-node wallet-node %) keys)
+                             (map #(an/sub-object wallet %) keys)
                              (map #(% wallet) keys))]
-      (nn/update node data)))
+      (an/update-node node data)))
   wallet)
 
 (defn save [wallet ctxt]
