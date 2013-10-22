@@ -7,9 +7,9 @@
   (:import [asid.wallet Wallet]))
 
 (defn wallet-from-node [node]
-  (let [bag-node (an/sub-node node :bag)
-        sig-node (an/sub-node node :signatures)
-        key-node (an/sub-node node :key)]
+  (let [bag-node (an/sub-object node :bag)
+        sig-node (an/sub-object node :signatures)
+        key-node (an/sub-object node :key)]
     (an/associate-node (Wallet. (-> node :data :identity)
                                 (:data bag-node)
                                 (:data sig-node)

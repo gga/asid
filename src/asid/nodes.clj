@@ -44,22 +44,13 @@
   (remove nil? (map #(if-let [end-node (-> % which-end)]
                        (nn/fetch-from end-node)
                        nil)
-                    (nrl/traverse (:id start)
+                    (nrl/traverse (:node-id start)
                                   :relationships [{:direction dir :type type}]))))
-
-(defn sub-nodes [start type]
-  (nodes-by-direction start type "out" :end))
-
-(defn parent-nodes [start type]
-  (nodes-by-direction start type "in" :start))
-
-(defn sub-node [start type]
-  (first (sub-nodes start type)))
 
 (defn sub-objects [start type]
   (if-let [node-id (:node-id start)]
-    (map #(conj (:data %) [:node-id (:id %)]) 
-         (sub-nodes {:id node-id} type))
+    (map #(conj (:data %) [:node-id (:id %)])
+         (nodes-by-direction start type "out" :end))
     []))
 
 (defn sub-object [start type]
@@ -67,7 +58,8 @@
 
 (defn parent-objects [start type]
   (if-let [node-id (:node-id start)]
-    (map :data (parent-nodes {:id node-id} type))
+    (map #(conj (:data %) [:node-id (:id %)])
+         (nodes-by-direction start type "in" :start))
     []))
 
 (defn parent-object [start type]
