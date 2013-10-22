@@ -21,11 +21,14 @@
           (nrl/create root asid-root :asid)
           (build-context asid-root))))))
 
-(defn create-node [data-map]
-  (:id (nn/create data-map)))
+(defn node-to-object [node]
+  (conj (:data node) [:node-id (:id node)]))
 
 (defn associate-node [data-map node]
-  (conj data-map [:node-id node]))
+  (conj data-map [:node-id (:node-id node)]))
+
+(defn create-node [data-map]
+  {:node-id (:id (nn/create data-map))})
 
 (defn has-node? [obj-or-map]
   (:node-id obj-or-map))
@@ -40,27 +43,24 @@
   (let [data-node (nn/create data)]
         (nrl/create (:node-id obj) data-node link)))
 
-(defn- nodes-by-direction [start type dir which-end]
-  (remove nil? (map #(if-let [end-node (-> % which-end)]
-                       (nn/fetch-from end-node)
-                       nil)
-                    (nrl/traverse (:node-id start)
-                                  :relationships [{:direction dir :type type}]))))
+(defn- objects-by-direction [start type dir which-end]
+  (if (has-node? start)
+    (let [found-nodes (remove nil? (map #(if-let [end-node (-> % which-end)]
+                                           (nn/fetch-from end-node)
+                                           nil)
+                                        (nrl/traverse (:node-id start)
+                                                      :relationships [{:direction dir :type type}])))]
+      (map node-to-object found-nodes))
+    []))
 
 (defn sub-objects [start type]
-  (if-let [node-id (:node-id start)]
-    (map #(conj (:data %) [:node-id (:id %)])
-         (nodes-by-direction start type "out" :end))
-    []))
+  (objects-by-direction start type "out" :end))
+
+(defn parent-objects [start type]
+  (objects-by-direction start type "in" :start))
 
 (defn sub-object [start type]
   (first (sub-objects start type)))
-
-(defn parent-objects [start type]
-  (if-let [node-id (:node-id start)]
-    (map #(conj (:data %) [:node-id (:id %)])
-         (nodes-by-direction start type "in" :start))
-    []))
 
 (defn parent-object [start type]
   (first (parent-objects start type)))
@@ -77,5 +77,6 @@
           first
           (get "dest")
           :self
-          nn/fetch-from)
+          nn/fetch-from
+          node-to-object)
       (ed/not-found))))

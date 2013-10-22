@@ -12,10 +12,10 @@
                                       :challenge (:challenge pool)})))
 
 (defn pool-from-node [node]
-  (conj (TrustPool. (-> node :data :name)
-                    (-> node :data :identity)
-                    (-> node :data :challenge))
-        [:node-id (:id node)]))
+  (an/associate-node (TrustPool. (-> node :name)
+                                 (-> node :identity)
+                                 (-> node :challenge))
+                     node))
 
 (defn pool-from-wallet [wallet poolid]
   (fail-> (an/node-with-identity wallet :trustpool poolid)
