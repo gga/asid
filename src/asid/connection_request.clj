@@ -33,7 +33,7 @@
 
   (links [conn-req]
     {:self (uri conn-req
-                (an/parent-object conn-req :requests-conn))
+                (an/superior conn-req :requests-conn))
      :from (:initiator-uri conn-req)
      :calling-card (:calling-card-uri conn-req)}))
 

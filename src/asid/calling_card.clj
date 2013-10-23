@@ -65,8 +65,8 @@
   card)
 
 (defn self-link [so-far card]
-  (let [pool (an/parent-object card :adds-identity)
-        wallet (an/parent-object pool :trustpool)]
+  (let [pool (an/superior card :adds-identity)
+        wallet (an/superior pool :trustpool)]
     (conj so-far [:self (uri card wallet)])))
 
 (extend-type CallingCard

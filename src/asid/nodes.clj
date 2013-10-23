@@ -54,17 +54,17 @@
       (map node-to-object found-nodes))
     []))
 
-(defn sub-objects [start type]
+(defn children [start type]
   (objects-by-direction start type "out" :end))
 
-(defn parent-objects [start type]
+(defn superiors [start type]
   (objects-by-direction start type "in" :start))
 
-(defn sub-object [start type]
-  (first (sub-objects start type)))
+(defn child [start type]
+  (first (children start type)))
 
-(defn parent-object [start type]
-  (first (parent-objects start type)))
+(defn superior [start type]
+  (first (superiors start type)))
 
 (defn node-with-identity [origin rel identity]
   (let [results (cy/tquery (str "START origin=node({originnode}) "

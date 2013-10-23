@@ -7,20 +7,17 @@
   (:import [asid.wallet Wallet]))
 
 (defn wallet-from-node [node]
-  (let [bag-node (an/sub-object node :bag)
-        sig-node (an/sub-object node :signatures)
-        key-node (an/sub-object node :key)]
-    (an/associate-node (Wallet. (-> node :identity)
-                                bag-node
-                                sig-node
-                                key-node)
-                       node)))
+  (an/associate-node (Wallet. (-> node :identity)
+                              (an/child node :bag)
+                              (an/child node :signatures)
+                              (an/child node :key))
+                     node))
 
 (defn- update [wallet]
   (an/update-node wallet {:identity (:identity wallet)})
   (let [keys [:bag :signatures :key]]
     (doseq [[node data] (map list
-                             (map #(an/sub-object wallet %) keys)
+                             (map #(an/child wallet %) keys)
                              (map #(% wallet) keys))]
       (an/update-node node data)))
   wallet)

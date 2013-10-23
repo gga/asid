@@ -30,7 +30,7 @@
                "blah") =not=> nil?)
 
 (defn self-link [so-far pool]
-  (conj so-far [:self (uri (an/parent-object pool :trustpool)
+  (conj so-far [:self (uri (an/superior pool :trustpool)
                            pool)]))
 
 (extend-type TrustPool

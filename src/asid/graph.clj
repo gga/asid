@@ -4,9 +4,9 @@
   (:require [asid.nodes :as an]))
 
 (defn w->tps [wallet]
-  (an/sub-objects wallet :trustpool))
+  (an/children wallet :trustpool))
 
 (fact
   (w->tps ..wallet..) => ["trustpool"]
   (provided
-    (an/sub-objects ..wallet.. :trustpool) => ["trustpool"]))
+    (an/children ..wallet.. :trustpool) => ["trustpool"]))
