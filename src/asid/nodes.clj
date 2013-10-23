@@ -45,11 +45,12 @@
 
 (defn- objects-by-direction [start type dir which-end]
   (if (has-node? start)
-    (let [found-nodes (remove nil? (map #(if-let [end-node (-> % which-end)]
-                                           (nn/fetch-from end-node)
-                                           nil)
-                                        (nrl/traverse (:node-id start)
-                                                      :relationships [{:direction dir :type type}])))]
+    (let [found-nodes (remove nil?
+                              (map #(if-let [end-node (-> % which-end)]
+                                      (nn/fetch-from end-node)
+                                      nil)
+                                   (nrl/traverse (:node-id start)
+                                                 :relationships [{:direction dir :type type}])))]
       (map node-to-object found-nodes))
     []))
 
