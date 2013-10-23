@@ -1,7 +1,7 @@
 (ns asid.wallet.links
   (:use midje.sweet)
 
-  (:require [asid.nodes :as an]
+  (:require [asid.graph :as ag]
             [asid.trust-pool :as tp]
             [asid.wallet :as w]
             [asid.render :as render])
@@ -22,7 +22,7 @@
 
 (defn all-trustpool-links [so-far wallet]
   (conj so-far [:trustpools (map #(tp/uri wallet %)
-                                 (an/sub-objects wallet :trustpool))]))
+                                 (ag/w->tps wallet))]))
 
 (defn letterplate-link [so-far wallet]
   (add-link so-far :letterplate w/letterplate-uri wallet))
