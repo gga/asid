@@ -11,6 +11,7 @@
             [clojure.string :as cs])
 
   (:require [asid.log :as log] 
+            [asid.graph :as ag]
             [asid.nodes :as an]
             [asid.identity :as aid]
             [asid.trust-pool :as tp]
@@ -72,7 +73,7 @@
                     challenge-keys (:challenge data)
                     pool (tpr/save (tp/new-trust-pool name challenge-keys) repo)
                     wallet (wr/get-wallet id repo)
-                    conn (an/connect-nodes wallet pool :trustpool)]
+                    pool (ag/trustpool pool wallet)]
                    (ar/created pool)))
 
   (GET "/:walletid/trustpool/:poolid" [walletid poolid]

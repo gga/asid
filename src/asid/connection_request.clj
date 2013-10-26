@@ -1,5 +1,5 @@
 (ns asid.connection-request
-  (:require [asid.nodes :as an]
+  (:require [asid.graph :as ag]
             [asid.render :as render]
             [asid.identity :as aid]
             [asid.wallet :as w]))
@@ -25,15 +25,13 @@
                       (-> data :links :self)))
 
 (defn attach [conn-req wallet]
-  (an/connect-nodes conn-req wallet :requests-conn)
-  conn-req)
+  (ag/requests-connection conn-req wallet))
 
 (extend-type ConnectionRequest
   render/Linked
 
   (links [conn-req]
-    {:self (uri conn-req
-                (an/superior conn-req :requests-conn))
+    {:self (uri conn-req (ag/cr->w conn-req))
      :from (:initiator-uri conn-req)
      :calling-card (:calling-card-uri conn-req)}))
 

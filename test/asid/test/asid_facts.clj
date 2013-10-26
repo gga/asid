@@ -5,7 +5,7 @@
   (:require [clojure.data.json :as json]
             [ring.mock.request :as mr])
 
-  (:require [asid.nodes :as an]
+  (:require [asid.graph :as ag]
             [asid.trust-pool :as tp]
             [asid.trust-pool-repository :as tpr]
             [asid.wallet :as w]
@@ -54,7 +54,7 @@
 (fact "GET /<wallet-id>/trustpool/<pool-id>"
   (let [wallet (wr/save (w/new-wallet "seed") repo)
         pool (tpr/save (tp/new-trust-pool "pool" ["name" "dob"]) repo)]
-    (an/connect-nodes wallet pool :trustpool)
+    (ag/trustpool pool wallet)
     (let [req (app (-> (mr/request :get (tp/uri wallet pool))
                        (mr/header "Accept" "application/vnd.org.asidentity.trust-pool+json")))]
       (:status req) => 200)

@@ -5,7 +5,7 @@
   (:require [clojure.data.json :as json]
             [asid.identity :as aid]
             [asid.wallet :as w]
-            [asid.nodes :as an]
+            [asid.graph :as ag]
             [asid.strings :as as]
             [asid.render :as render]
             [asid.error.definition :as ed]
@@ -61,12 +61,10 @@
           (remember-counterpart card)))
 
 (defn attach [card pool]
-  (an/connect-nodes card pool :adds-identity)
-  card)
+  (ag/adds-identity card pool))
 
 (defn self-link [so-far card]
-  (let [pool (an/superior card :adds-identity)
-        wallet (an/superior pool :trustpool)]
+   (let [wallet (ag/c->w card)]
     (conj so-far [:self (uri card wallet)])))
 
 (extend-type CallingCard

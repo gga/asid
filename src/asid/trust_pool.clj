@@ -1,9 +1,9 @@
 (ns asid.trust-pool
   (:use midje.sweet)
 
-  (:require [asid.wallet :as w]
+  (:require [asid.graph :as ag]
+            [asid.wallet :as w]
             [asid.identity :as aid]
-            [asid.nodes :as an]
             [asid.render :as render]))
 
 (defrecord TrustPool [name identity challenge])
@@ -30,8 +30,7 @@
                "blah") =not=> nil?)
 
 (defn self-link [so-far pool]
-  (conj so-far [:self (uri (an/superior pool :trustpool)
-                           pool)]))
+  (conj so-far [:self (uri (ag/tp->w pool) pool)]))
 
 (extend-type TrustPool
   render/Resource
