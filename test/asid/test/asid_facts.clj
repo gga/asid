@@ -12,54 +12,54 @@
             [asid.wallet.repository :as wr]))
 
 (fact "GET /"
-  (:status (app (mr/request :get "/"))) => 200)
+  (:status ((create-app) (mr/request :get "/"))) => 200)
 
 (fact "POST /identity"
-  (let [resp (app (-> (mr/request :post "/identity")
-                      (mr/body "sample-id-seed")))]
+  (let [resp ((create-app) (-> (mr/request :post "/identity")
+                               (mr/body "sample-id-seed")))]
     (:status resp) => 201
     (-> resp :headers (get "Location")) => #"\/[a-z0-9-]+$")
-  (let [resp (app (-> (mr/request :post "/identity")
-                      (mr/body "")))]
+  (let [resp ((create-app) (-> (mr/request :post "/identity")
+                               (mr/body "")))]
     (:status resp) => 400))
 
 (fact "GET /<wallet-id>"
-  (let [resp (app (-> (mr/request :get "/bada-bada-bada-1d")
-                      (mr/header "Accept" "application/vnd.org.asidentity.wallet+json")))]
+  (let [resp ((create-app) (-> (mr/request :get "/bada-bada-bada-1d")
+                               (mr/header "Accept" "application/vnd.org.asidentity.wallet+json")))]
     (:status resp) => 404
     (:body resp) => "Not found.")
   (let [wallet (wr/save (w/new-wallet "seed") repo)
-        resp (app (-> (mr/request :get (w/uri wallet))
-                      (mr/header "Accept" "text/html, application/xml")))]
+        resp ((create-app) (-> (mr/request :get (w/uri wallet))
+                               (mr/header "Accept" "text/html, application/xml")))]
     (:status resp) => 200)
   (let [wallet (wr/save (w/new-wallet "seed") repo)
-        resp (app (-> (mr/request :get (w/uri wallet))
-                      (mr/header "Accept" "application/vnd.org.asidentity.introduction+json")))
+        resp ((create-app) (-> (mr/request :get (w/uri wallet))
+                               (mr/header "Accept" "application/vnd.org.asidentity.introduction+json")))
         intro-doc (json/read-str (:body resp))]
     (:status resp) => 200
     (-> intro-doc (get "bag")) => nil?))
 
 (fact "POST /<wallet-id>/bag"
   (let [wallet (wr/save (w/new-wallet "seed") repo)
-        resp (app (mr/request :post (w/bag-uri wallet) {"key" "key1" "value" "new-value"}))]
+        resp ((create-app) (mr/request :post (w/bag-uri wallet) {"key" "key1" "value" "new-value"}))]
     (:status resp) => 200))
 
 (fact "POST /<wallet-id>/trustpool"
   (let [wallet (wr/save (w/new-wallet "seed") repo)
-        resp (app (-> (mr/request :post (w/trustpool-uri wallet)
-                                  (json/write-str {:name "hello" :challenge ["name"]}))
-                      (mr/header "Content-Type" "application/vnd.org.asidentity.trust-pool+json")))]
+        resp ((create-app) (-> (mr/request :post (w/trustpool-uri wallet)
+                                           (json/write-str {:name "hello" :challenge ["name"]}))
+                               (mr/header "Content-Type" "application/vnd.org.asidentity.trust-pool+json")))]
     (:status resp) => 201))
 
 (fact "GET /<wallet-id>/trustpool/<pool-id>"
   (let [wallet (wr/save (w/new-wallet "seed") repo)
         pool (tpr/save (tp/new-trust-pool "pool" ["name" "dob"]) repo)]
     (ag/trustpool pool wallet)
-    (let [resp (app (-> (mr/request :get (tp/uri wallet pool))
-                        (mr/header "Accept" "application/vnd.org.asidentity.trust-pool+json")))]
+    (let [resp ((create-app) (-> (mr/request :get (tp/uri wallet pool))
+                                 (mr/header "Accept" "application/vnd.org.asidentity.trust-pool+json")))]
       (:status resp) => 200)
-    (let [resp (app (-> (mr/request :get (str (w/uri wallet) "/trustpool/bada-bada-bada-1d"))
-                        (mr/header "Accept" "application/vnd.org.asidentity.trust-pool+json")))]
+    (let [resp ((create-app) (-> (mr/request :get (str (w/uri wallet) "/trustpool/bada-bada-bada-1d"))
+                                 (mr/header "Accept" "application/vnd.org.asidentity.trust-pool+json")))]
       (:status resp) => 404
       (:body resp) => "Not found.")))
 
@@ -68,8 +68,8 @@
         pool (tpr/save (tp/new-trust-pool "pool" ["name"]) repo)
         trustee (wr/save (w/new-wallet "trustee") repo)]
     (ag/trustpool pool initiator)
-    (let [resp (app (-> (mr/request :post (tp/uri initiator pool)
-                                    (json/write-str {:uri (w/uri trustee)
-                                                     :identity (:identity trustee)}))
-                        (mr/header "Content-Type" "application/vnd.org.asidentity.calling-card+json")))]
+    (let [resp ((create-app) (-> (mr/request :post (tp/uri initiator pool)
+                                             (json/write-str {:uri (w/uri trustee)
+                                                              :identity (:identity trustee)}))
+                                 (mr/header "Content-Type" "application/vnd.org.asidentity.calling-card+json")))]
       (:status resp)) => 201))

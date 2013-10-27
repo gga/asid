@@ -100,7 +100,7 @@
 
   (route/not-found (afr/file-resource "not-found.html")))
 
-(def app
+(defn create-app []
   (-> (handler/site main-routes)
       log/inbound-request
       req/capture-request
