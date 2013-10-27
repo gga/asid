@@ -62,3 +62,14 @@
                         (mr/header "Accept" "application/vnd.org.asidentity.trust-pool+json")))]
       (:status resp) => 404
       (:body resp) => "Not found.")))
+
+(fact "POST /<wallet-id>/trustpool/<pool-id>"
+  (let [initiator (wr/save (w/new-wallet "initiator") repo)
+        pool (tpr/save (tp/new-trust-pool "pool" ["name"]) repo)
+        trustee (wr/save (w/new-wallet "trustee") repo)]
+    (ag/trustpool pool initiator)
+    (let [resp (app (-> (mr/request :post (tp/uri initiator pool)
+                                    (json/write-str {:uri (w/uri trustee)
+                                                     :identity (:identity trustee)}))
+                        (mr/header "Content-Type" "application/vnd.org.asidentity.calling-card+json")))]
+      (:status resp)) => 201))
