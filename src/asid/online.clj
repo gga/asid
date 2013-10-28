@@ -5,7 +5,7 @@
 
 (defn start-asid
   ([] (start-asid 8888))
-  ([port] (run-jetty (asid/create-app)
+  ([port] (run-jetty (:web (asid/app))
                      {:port port :join? false})))
 
 (defn -main []
