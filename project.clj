@@ -19,5 +19,7 @@
                  [lein-midje "3.0.0"]
                  [ring-mock "0.1.5"]]
 
+  :profiles {:dev {:dependencies [[robert/hooke "1.3.0"]]}}
+
   :ring {:handler asid/app})
   
