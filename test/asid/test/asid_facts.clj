@@ -90,3 +90,18 @@
           (:status resp) => 201
           (-> body :otherParty) => "other-id"
           (-> body :links :self) =contains=> (-> body :identity))))))
+
+(fact "POST /<wallet-id>/letterplate"
+  (let [t-app (app)]
+    (let [conn-req {:from "initiator-id"
+                    :trust {:name "pool"
+                            :identity "pool-id"
+                            :challenge ["key"]}
+                    :links {:self "calling-card-uri"
+                            :initiator "initiator-wallet-uri"}}
+          trustee (wr/save (w/new-wallet "trustee") (:repo t-app))
+          resp ((:web t-app) (-> (mr/request :post (w/letterplate-uri trustee)
+                                             (json/write-str conn-req))
+                                 (mr/header "Content-Type" "vnd/application.org.asidentity.connection-request+json")))]
+      (:status resp) => 201
+      (-> resp :headers (get "Location")) => (re-pattern (str (w/uri trustee) "/request/[a-f0-9-]+$")))))
