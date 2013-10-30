@@ -3,13 +3,16 @@
         asid)
 
   (:require [clojure.data.json :as json]
-            [ring.mock.request :as mr])
+            [ring.mock.request :as mr]
+            [compojure.core :as cc]
+            [ring.util.response :as rur])
 
   (:require [asid.graph :as ag]
             [asid.trust-pool :as tp]
             [asid.trust-pool-repository :as tpr]
             [asid.wallet :as w]
-            [asid.wallet.repository :as wr]))
+            [asid.wallet.repository :as wr]
+            [asid.test.http-mock :as hm]))
 
 (fact "GET /"
   (:status ((:web (app)) (mr/request :get "/"))) => 200)
@@ -68,13 +71,22 @@
         (:body resp) => "Not found."))))
 
 (fact "POST /<wallet-id>/trustpool/<pool-id>"
-  (let [t-app (app)]
-    (let [initiator (wr/save (w/new-wallet "initiator") (:repo t-app))
-          pool (tpr/save (tp/new-trust-pool "pool" ["name"]) (:repo t-app))
-          trustee (wr/save (w/new-wallet "trustee") (:repo t-app))]
-      (ag/trustpool pool initiator)
-      (let [resp ((:web t-app) (-> (mr/request :post (tp/uri initiator pool)
-                                               (json/write-str {:uri (w/uri trustee)
-                                                                :identity (:identity trustee)}))
-                                   (mr/header "Content-Type" "application/vnd.org.asidentity.calling-card+json")))]
-        (:status resp)) => 201)))
+  (hm/with-mock-http-server (hm/mock "http://example.com"
+                                     (cc/GET "/other-id" []
+                                             (json/write-str {:links {:letterplate "http://example.com/other-id/letterplate"}}))
+                                     (cc/POST "/other-id/letterplate" []
+                                              (-> (rur/response "Received calling card.")
+                                                  (rur/status 201)
+                                                  (rur/header "Location" "http://example.com/conn-req"))))
+    (let [t-app (app)]
+      (let [initiator (wr/save (w/new-wallet "initiator") (:repo t-app))
+            pool (tpr/save (tp/new-trust-pool "pool" ["name"]) (:repo t-app))]
+        (ag/trustpool pool initiator)
+        (let [resp ((:web t-app) (-> (mr/request :post (tp/uri initiator pool)
+                                                 (json/write-str {:uri "http://example.com/other-id"
+                                                                  :identity "other-id"}))
+                                     (mr/header "Content-Type" "application/vnd.org.asidentity.calling-card+json")))
+              body (json/read-str (:body resp) :key-fn keyword)]
+          (:status resp) => 201
+          (-> body :otherParty) => "other-id"
+          (-> body :links :self) =contains=> (-> body :identity))))))

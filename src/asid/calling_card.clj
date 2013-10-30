@@ -12,7 +12,7 @@
             [asid.current-request :as req]
             [clj-http.client :as http]))
 
-(defrecord CallingCard [card-id target-uri other-party])
+(defrecord CallingCard [identity target-uri other-party])
 
 (defn uri [card wallet]
   (str (w/uri wallet) "/card/" (:identity card)))

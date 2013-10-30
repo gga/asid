@@ -9,18 +9,22 @@
             [robert.hooke :as hooke]
             [clj-http.client :as http]))
 
-(defn- make-server [base-uri routes]
+(defn make-server [base-uri routes]
   {:base-uri base-uri
    :routes (ch/site routes)})
 
 (def ^:dynamic *mocked-server*)
 
+(defn- rebuild-clj-response [{headers :headers :as resp}]
+  (conj resp [:headers (into {} (for [[hdr val] headers] [(.toLowerCase hdr) val]))]))
+
 (defn- mock-http-request [f request]
-  (if (.startsWith (:url request) (:base-uri *mocked-server*))
+  (if (and (not (nil? *mocked-server*))
+           (.startsWith (:url request) (:base-uri *mocked-server*)))
     (let [fake-handler (:routes *mocked-server*)
           ring-req (mr/request (:method request) (:url request))
           ring-req (conj ring-req [:headers (:headers request)])]
-      (fake-handler ring-req))
+      (rebuild-clj-response (fake-handler ring-req)))
     (f request)))
 
 (defmacro mock [base-uri & routes]
