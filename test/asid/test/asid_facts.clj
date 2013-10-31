@@ -71,13 +71,14 @@
         (:body resp) => "Not found."))))
 
 (fact "POST /<wallet-id>/trustpool/<pool-id>"
-  (hm/with-mock-http-server (hm/mock "http://example.com"
-                                     (cc/GET "/other-id" []
-                                             (json/write-str {:links {:letterplate "http://example.com/other-id/letterplate"}}))
-                                     (cc/POST "/other-id/letterplate" []
-                                              (-> (rur/response "Received calling card.")
-                                                  (rur/status 201)
-                                                  (rur/header "Location" "http://example.com/conn-req"))))
+  (hm/with-mock-http-server
+    (hm/mock "http://example.com"
+             (cc/GET "/other-id" []
+                     (json/write-str {:links {:letterplate "http://example.com/other-id/letterplate"}}))
+             (cc/POST "/other-id/letterplate" []
+                      (-> (rur/response "Received calling card.")
+                          (rur/status 201)
+                          (rur/header "Location" "http://example.com/conn-req"))))
     (let [t-app (app)]
       (let [initiator (wr/save (w/new-wallet "initiator") (:repo t-app))
             pool (tpr/save (tp/new-trust-pool "pool" ["name"]) (:repo t-app))]
