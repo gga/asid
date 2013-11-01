@@ -81,3 +81,12 @@
           nn/fetch-from
           node-to-object)
       (ed/not-found))))
+
+(defn wallet-to-cards [wallet]
+  (if (has-node? wallet)
+    (let [results (cy/tquery (str "START origin=node({originnode}) "
+                                  "MATCH origin-[:trustpool]->()<-[:addsidentity]-card "
+                                  "RETURN card")
+                             {:originnode (:node-id wallet)})]
+      (if (not (empty? results))
+        (map #(-> % (get "card") :self nn/fetch-from node-to-object) results)))))

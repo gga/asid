@@ -11,14 +11,22 @@
   (provided
     (an/children ..wallet.. :trustpool) => ["trustpool"]))
 
+(defn w->ccs [wallet]
+  (an/wallet-to-cards wallet))
+
+(fact
+  (w->ccs ..wallet..) => ..cards..
+  (provided
+    (an/wallet-to-cards ..wallet..) => ..cards..))
+
 (defn c->w [card]
-  (-> (an/child card :adds-identity)
+  (-> (an/child card :addsidentity)
       (an/superior :trustpool)))
 
 (fact
   (c->w ..card..) => "wallet"
   (provided
-    (an/child ..card.. :adds-identity) => ..pool..
+    (an/child ..card.. :addsidentity) => ..pool..
     (an/superior ..pool.. :trustpool) => "wallet"))
 
 (defn tp->w [pool]
@@ -42,7 +50,7 @@
   pool)
 
 (defn adds-identity [card pool]
-  (an/connect-nodes card pool :adds-identity)
+  (an/connect-nodes card pool :addsidentity)
   card)
 
 (defn requests-connection [conn-req wallet]
