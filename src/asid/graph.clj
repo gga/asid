@@ -12,12 +12,23 @@
     (an/children ..wallet.. :trustpool) => ["trustpool"]))
 
 (defn w->ccs [wallet]
-  (an/wallet-to-cards wallet))
+  (if (an/has-node? wallet)
+    (an/nodes-by-cypher (str "START wallet=node({walletnode}) "
+                             "MATCH wallet-[:trustpool]->()<-[:addsidentity]-card "
+                             "RETURN card")
+                        {:walletnode (an/node-from wallet)}
+                        "card")))
 
 (fact
   (w->ccs ..wallet..) => ..cards..
   (provided
-    (an/wallet-to-cards ..wallet..) => ..cards..))
+    (an/has-node? ..wallet..) => true
+    (an/node-from ..wallet..) => "node descriptor"
+    (an/nodes-by-cypher (str "START wallet=node({walletnode}) "
+                             "MATCH wallet-[:trustpool]->()<-[:addsidentity]-card "
+                             "RETURN card")
+                        {:walletnode "node descriptor"}
+                        "card") => ..cards..))
 
 (defn c->w [card]
   (-> (an/child card :addsidentity)

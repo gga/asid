@@ -30,8 +30,11 @@
 (defn create-node [data-map]
   {:node-id (:id (nn/create data-map))})
 
+(defn node-from [obj]
+  (:node-id obj))
+
 (defn has-node? [obj-or-map]
-  (:node-id obj-or-map))
+  (contains? obj-or-map :node-id))
 
 (defn update-node [obj data]
   (nn/update (:node-id obj) data))
@@ -82,11 +85,7 @@
           node-to-object)
       (ed/not-found))))
 
-(defn wallet-to-cards [wallet]
-  (if (has-node? wallet)
-    (let [results (cy/tquery (str "START origin=node({originnode}) "
-                                  "MATCH origin-[:trustpool]->()<-[:addsidentity]-card "
-                                  "RETURN card")
-                             {:originnode (:node-id wallet)})]
-      (if (not (empty? results))
-        (map #(-> % (get "card") :self nn/fetch-from node-to-object) results)))))
+(defn nodes-by-cypher [query params column]
+  (let [results (cy/tquery query params)]
+    (if (not (empty? results))
+        (map #(-> % (get column) :self nn/fetch-from node-to-object) results))))
