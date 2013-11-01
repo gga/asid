@@ -63,7 +63,7 @@
 
                   (POST ["/:id/trustpool", :id aid/grammar] [id :as {pool-doc :json-doc}]
                         (dofailure [data (validate! pool-doc :not-empty :name)
-                                    name (name :data)
+                                    name (:name data)
                                     challenge-keys (:challenge data)
                                     pool (tpr/save (tp/new-trust-pool name challenge-keys) repo)
                                     wallet (wr/get-wallet id repo)

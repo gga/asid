@@ -54,8 +54,11 @@
     (let [wallet (wr/save (w/new-wallet "seed") (:repo t-app))
           resp ((:web t-app) (-> (mr/request :post (w/trustpool-uri wallet)
                                              (json/write-str {:name "hello" :challenge ["name"]}))
-                                 (mr/header "Content-Type" "application/vnd.org.asidentity.trust-pool+json")))]
-      (:status resp) => 201)))
+                                 (mr/header "Content-Type" "application/vnd.org.asidentity.trust-pool+json")))
+          pool-doc (json/read-str (:body resp) :key-fn keyword)]
+      (:status resp) => 201
+      (:name pool-doc) => "hello"
+      (:challenge pool-doc) => ["name"])))
 
 (fact "GET /<wallet-id>/trustpool/<pool-id>"
   (let [t-app (app)]
