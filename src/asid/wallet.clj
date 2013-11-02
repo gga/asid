@@ -4,6 +4,7 @@
 
   (:require [clojure.data.json :as json]
             [asid.identity :as aid]
+            [asid.nodes :as an]
             [asid.render :as render])
 
   (:import [org.bouncycastle.jce.provider BouncyCastleProvider]
@@ -71,11 +72,11 @@
     (to-hex (.sign sig))))
 
 (defn add-data [wallet key value]
-  (assoc (Wallet. (:identity wallet)
-                  (assoc (:bag wallet) key value)
-                  (:signatures wallet)
-                  (:key wallet))
-    :node-id (:node-id wallet)))
+  (an/associate-node (Wallet. (:identity wallet)
+                              (assoc (:bag wallet) key value)
+                              (:signatures wallet)
+                              (:key wallet))
+                     wallet))
 
 (fact
   (let [orig (new-wallet "id")
