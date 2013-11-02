@@ -33,6 +33,9 @@
 (defn node-from [obj]
   (:node-id obj))
 
+(defn clean-node [node]
+  (dissoc node :node-id))
+
 (defn has-node? [obj-or-map]
   (contains? obj-or-map :node-id))
 

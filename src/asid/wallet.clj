@@ -90,8 +90,8 @@
 
   (to-json [wallet]
     {:identity (:identity wallet)
-     :bag (:bag wallet)
-     :signatures (:signatures wallet)
+     :bag (an/clean-node (:bag wallet))
+     :signatures (an/clean-node (:signatures wallet))
      :key {:public (-> wallet :key :public)}})
 
   (content-type [_]

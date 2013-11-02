@@ -34,6 +34,12 @@
       (:body resp) => "Not found.")
     (let [wallet (wr/save (w/new-wallet "seed") (:repo t-app))
           resp ((:web t-app) (-> (mr/request :get (w/uri wallet))
+                                 (mr/header "Accept" "application/vnd.org.asidentity.wallet+json")))
+          body (json/read-str (:body resp) :key-fn keyword)]
+      (:status resp) => 200
+      (-> body :bag) => empty?)
+    (let [wallet (wr/save (w/new-wallet "seed") (:repo t-app))
+          resp ((:web t-app) (-> (mr/request :get (w/uri wallet))
                                  (mr/header "Accept" "text/html, application/xml")))]
       (:status resp) => 200)
     (let [wallet (wr/save (w/new-wallet "seed") (:repo t-app))
