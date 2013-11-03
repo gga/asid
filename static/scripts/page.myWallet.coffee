@@ -65,6 +65,11 @@ define ['jquery', 'underscore', 'icanhaz'], ($, _, ich) ->
               $('.connIdentity', connForm).val(),
               $('.connUri', connForm).val())
 
+  onAcceptRequest: (handler) ->
+    $(document).on 'click', '.requests .accept', (e) ->
+      e.preventDefault()
+      handler(e.target.dataset.request)
+
   render: (viewMsg) ->
     if _.has(viewMsg, 'wallet')
       $('.wallet').html(ich.walletTmpl(viewMsg.wallet))

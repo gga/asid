@@ -90,6 +90,17 @@ define ['underscore',
       elseFailed: ->
         console.log("Error! Couldn't leave calling card with other party.")
 
+  myWalletPage.onAcceptRequest (requestUri) ->
+    connReqRepo.get requestUri,
+      ifSucceeded: (connReq) ->
+        connReq.accepted = true
+        connReqRepo.update requestUri, connReq,
+          ifSucceeded: () ->
+            console.log("Successfully connected!")
+          elseFailed: (err) ->
+            console.log("Unable to connect.")
+            console.log(err)
+
   launch: (walletUri) ->
     navigator.changePage(walletUri)
 

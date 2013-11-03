@@ -50,7 +50,7 @@
         %h4.otherIdentity
           %a(href="{{ links.from }}") {{ from }}
         .controls
-          %input.accept(type="button" value="Accept")
+          %input.accept(data-request="{{links.self}}" type="button" value="Accept")
         %p
           Requires:
           %code
