@@ -52,12 +52,12 @@
     (an/superior ..pool.. :trustpool) => "wallet"))
 
 (defn cr->w [conn-req]
-  (an/child conn-req :requests-conn))
+  (an/superior conn-req :requestsconn))
 
 (fact
   (cr->w ..conn-req..) => "wallet"
   (provided
-    (an/child ..conn-req.. :requests-conn) => "wallet"))
+    (an/superior ..conn-req.. :requestsconn) => "wallet"))
 
 (defn trustpool [pool wallet]
   (an/connect-nodes wallet pool :trustpool)
@@ -68,5 +68,5 @@
   card)
 
 (defn requests-connection [conn-req wallet]
-  (an/connect-nodes conn-req wallet :requests-conn)
+  (an/connect-nodes wallet conn-req :requestsconn)
   conn-req)

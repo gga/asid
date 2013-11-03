@@ -10,6 +10,8 @@
   (:require [asid.graph :as ag]
             [asid.calling-card :as cc]
             [asid.calling-card-repository :as ccr]
+            [asid.connection-request :as cr]
+            [asid.connection-request-repository :as crr]
             [asid.trust-pool :as tp]
             [asid.trust-pool-repository :as tpr]
             [asid.wallet :as w]
@@ -134,3 +136,24 @@
         (-> body :otherParty) => "target-id"
         (-> body :links :self) => (cc/uri card wallet)
         (-> body :links :trustpool) => (tp/uri wallet pool)))))
+
+(fact "GET /<wallet-id/request/<conn-req-id>"
+  (let [t-app (app)]
+    (let [wallet (wr/save (w/new-wallet "seed") (:repo t-app))
+          conn-req (crr/save (cr/new-connection-request {:from "initiator-id"
+                                                         :trust {:name "pool"
+                                                                 :identity "pool-id"
+                                                                 :challenge ["challenge"]}
+                                                         :links {:initiator "initiator-uri"
+                                                                 :self "calling-card-uri"}}))]
+      (ag/requests-connection conn-req wallet)
+      (let [resp ((:web t-app) (-> (mr/request :get (cr/uri conn-req wallet))
+                                   (mr/header "Accept" "application/vnd.org.asidentity.connection-request+json")))
+            body (json/read-str (:body resp) :key-fn keyword)]
+        (:status resp) => 200
+        (-> body :pool :name) => "pool"
+        (-> body :pool :identity) => "pool-id"
+        (-> body :pool :challenge) => ["challenge"]
+        (-> body :links :self) => (cr/uri conn-req wallet)
+        (-> body :links :from) => "initiator-uri"
+        (-> body :links :callingCard) => "calling-card-uri"))))

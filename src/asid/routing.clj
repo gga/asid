@@ -18,13 +18,13 @@
             [asid.wallet :as w]
             [asid.calling-card :as cc]
             [asid.introduction :as i]
-            [asid.connection-request :as conn]
+            [asid.connection-request :as cr]
             [asid.wallet.links :as awl]
             [asid.wallet.repository :as wr]
             [asid.response :as ar]
             [asid.trust-pool-repository :as tpr]
             [asid.calling-card-repository :as ccr]
-            [asid.connection-request-repository :as cr]))
+            [asid.connection-request-repository :as crr]))
 
 (defn uri-map [repo]
   (handler/site (routes
@@ -92,9 +92,14 @@
 
                   (POST ["/:id/letterplate", :id aid/grammar] [id :as {conn-req :json-doc}]
                         (dofailure [wallet (wr/get-wallet id repo)] 
-                                   (fail-> (conn/new-connection-request conn-req)
-                                           cr/save
-                                           (conn/attach wallet)
+                                   (fail-> (cr/new-connection-request conn-req)
+                                           crr/save
+                                           (cr/attach wallet)
                                            ar/created)))
+
+                  (GET "/:walletid/request/:connreqid" [walletid connreqid]
+                       (fail-> (wr/get-wallet walletid repo)
+                               (crr/conn-req-from-wallet connreqid)
+                               (ar/resource)))
 
                   (route/not-found (afr/file-resource "not-found.html")))))

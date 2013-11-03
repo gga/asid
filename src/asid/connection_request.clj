@@ -33,7 +33,7 @@
   (links [conn-req]
     {:self (uri conn-req (ag/cr->w conn-req))
      :from (:initiator-uri conn-req)
-     :calling-card (:calling-card-uri conn-req)}))
+     :callingCard (:calling-card-uri conn-req)}))
 
 (extend-type ConnectionRequest
   render/Resource
