@@ -4,6 +4,7 @@
   (:require [asid.graph :as ag]
             [asid.trust-pool :as tp]
             [asid.calling-card :as cc]
+            [asid.connection-request :as cr]
             [asid.wallet :as w]
             [asid.render :as render]
 
@@ -34,6 +35,10 @@
   (conj so-far [:cards (map #(cc/uri % wallet)
                             (ag/w->ccs wallet))]))
 
+(defn all-connection-request-links [so-far wallet]
+  (conj so-far [:connectionRequests (map #(cr/uri % wallet)
+                                         (ag/w->crs wallet))]))
+
 (defn letterplate-link [so-far wallet]
   (add-link so-far :letterplate w/letterplate-uri wallet))
 
@@ -47,6 +52,7 @@
         (trustpool-link wallet)
         (all-trustpool-links wallet)
         (all-calling-card-links wallet)
+        (all-connection-request-links wallet)
         (letterplate-link wallet))))
 
 (fact

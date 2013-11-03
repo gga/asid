@@ -40,6 +40,7 @@
 
   (to-json [conn-req]
     {:identity (:identity conn-req)
+     :from (:from-identity conn-req)
      :pool {:name (:pool-name conn-req)
             :identity (:pool-identity conn-req)
             :challenge (:pool-challenge conn-req)}})

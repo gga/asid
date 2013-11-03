@@ -11,6 +11,14 @@
   (provided
     (an/children ..wallet.. :trustpool) => ["trustpool"]))
 
+(defn w->crs [wallet]
+  (an/children wallet :requestsconn))
+
+(fact
+  (w->crs ..wallet..) => ["conn-req"]
+  (provided
+    (an/children ..wallet.. :requestsconn) => ["conn-req"]))
+
 (defn w->ccs [wallet]
   (if (an/has-node? wallet)
     (an/nodes-by-cypher (str "START wallet=node({walletnode}) "
