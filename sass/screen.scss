@@ -96,6 +96,14 @@ label {
   ul {
     @include tabs;
   }
+
+  h3 {
+    font-size: 1.1em;
+    margin-bottom: 1.5em;
+  }
+  h4 {
+    @include subheader;
+  }
 }
 
 .pools {
@@ -105,14 +113,6 @@ label {
     .details {
       @include pre(1);
       @include span-columns(3, 6);
-
-      h3.poolName {
-        font-size: 1.1em;
-        margin-bottom: 1.5em;
-      }
-      h4.poolIdentity {
-        @include subheader;
-      }
 
       p {
         margin-top: -0.5em;
@@ -165,6 +165,10 @@ label {
       }
     }
   }
+}
+
+.cards {
+  display: none;
 }
 
 .bag {

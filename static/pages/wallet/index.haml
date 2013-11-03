@@ -40,6 +40,12 @@
         .controls
           %a.sign(href="#" data-pool="{{links.self}}") Connect&hellip;
 
+    %script#cardTmpl(type="text/html")
+      .card
+        %h3.poolName {{ trustPoolName }}
+        %h4.otherIdentity
+          %a(href="{{ otherPartyUrl }}") {{ otherParty }}
+
     %script#poolConnectionTmpl(type="text/html")
       .connectionDialog
         %form
@@ -65,11 +71,11 @@
         .detail
           %ul
             %li
-              %a.current Trust Pools
+              %a.poolsTab.current(href='#') Trust Pools
             %li
-              %a Cards
+              %a.cardsTab(href='#') Cards
             %li
-              %a Requests
+              %a.requestsTab(href='#') Requests
           
           .pools
             .controls
@@ -82,6 +88,12 @@
                   .challengeControls
                     %input#addChallenge(type="button" value="Add")
                   .pieces
+            .entries
+
+          .cards
+            .entries
+
+          .requests
             .entries
 
         .bag
