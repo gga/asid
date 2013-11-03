@@ -2,8 +2,9 @@ define ['underscore',
         'repository.wallet',
         'repository.trustPool',
         'repository.callingCard',
+        'repository.connectionRequest',
         'page.myWallet',
-        'navigator'], (_, walletRepo, trustPoolRepo, callingCardRepo, myWalletPage, navigator) ->
+        'navigator'], (_, walletRepo, trustPoolRepo, callingCardRepo, connReqRepo, myWalletPage, navigator) ->
   currentWallet = null
 
   presentWallet = (wallet) ->
@@ -36,10 +37,19 @@ define ['underscore',
   displayCallingCards = () ->
     _.each(currentWallet.links.cards, displayCallingCard)
 
+  displayConnectionRequest = (connReqUri) ->
+    connReqRepo.get connReqUri,
+      ifSucceeded: (connReq) ->
+        myWalletPage.render(addConnReq: connReq)
+
+  displayConnectionRequests = () ->
+    _.each(currentWallet.links.connectionRequests, displayConnectionRequest)
+
   displayCurrentWallet = () ->
     displayCurrentWalletData()
     displayTrustPools()
     displayCallingCards()
+    displayConnectionRequests()
 
   switchToTab = (tab) ->
     myWalletPage.render

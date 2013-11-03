@@ -33,9 +33,7 @@
           %h3.poolName {{ name }}
           %h4.poolIdentity {{ identity }}
           %p
-            {{#challenge}}
-            {{.}}
-            {{/challenge}}
+            %code {{#challenge}}{{.}} {{/challenge}}
           .dialog(id="{{links.self}}")
         .controls
           %a.sign(href="#" data-pool="{{links.self}}") Connect&hellip;
@@ -45,6 +43,18 @@
         %h3.poolName {{ trustPoolName }}
         %h4.otherIdentity
           %a(href="{{ otherPartyUrl }}") {{ otherParty }}
+
+    %script#connReqTmpl(type="text/html")
+      .request
+        %h3.poolName {{ pool.name }}
+        %h4.otherIdentity
+          %a(href="{{ links.from }}") {{ from }}
+        .controls
+          %input.accept(type="button" value="Accept")
+        %p
+          Requires:
+          %code
+            {{#pool.challenge}}{{ . }} {{/pool.challenge}}
 
     %script#poolConnectionTmpl(type="text/html")
       .connectionDialog

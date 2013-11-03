@@ -167,8 +167,12 @@ label {
   }
 }
 
-.cards {
-  display: none;
+.requests {
+  .controls {
+    @include span-columns(2 omega, 6);
+  }
+  .challenge {
+  }
 }
 
 .bag {

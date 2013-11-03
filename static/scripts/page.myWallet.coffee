@@ -75,6 +75,8 @@ define ['jquery', 'underscore', 'icanhaz'], ($, _, ich) ->
       $('.pools .entries').append(ich.trustPoolsTmpl(viewMsg.addTrustPool))
     if _.has(viewMsg, 'addCard')
       $('.cards .entries').append(ich.cardTmpl(viewMsg.addCard))
+    if _.has(viewMsg, 'addConnReq')
+      $('.requests .entries').append(ich.connReqTmpl(viewMsg.addConnReq))
     if _.has(viewMsg, 'displayPoolConnDetails')
       poolUri = viewMsg.displayPoolConnDetails
       $(".dialog[id='#{poolUri}']").html(ich.poolConnectionTmpl(uri: poolUri))
