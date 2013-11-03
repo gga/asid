@@ -85,6 +85,11 @@
                                            (cc/attach pool)
                                            ar/created)))
 
+                  (GET "/:walletid/card/:cardid" [walletid cardid]
+                       (fail-> (wr/get-wallet walletid repo)
+                               (ccr/card-from-wallet cardid)
+                               (ar/resource)))
+
                   (POST ["/:id/letterplate", :id aid/grammar] [id :as {conn-req :json-doc}]
                         (dofailure [wallet (wr/get-wallet id repo)] 
                                    (fail-> (conn/new-connection-request conn-req)
