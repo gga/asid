@@ -132,4 +132,5 @@
         (:status resp) => 200
         (-> body :identity) =not=> nil?
         (-> body :otherParty) => "target-id"
-        (-> body :links :self) => (cc/uri card wallet)))))
+        (-> body :links :self) => (cc/uri card wallet)
+        (-> body :links :trustpool) => (tp/uri wallet pool)))))

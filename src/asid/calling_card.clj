@@ -6,8 +6,9 @@
             [asid.identity :as aid]
             [asid.wallet :as w]
             [asid.graph :as ag]
-            [asid.strings :as as]
             [asid.render :as render]
+            [asid.strings :as as]
+            [asid.trust-pool :as tp]
             [asid.error.definition :as ed]
             [asid.current-request :as req]
             [clj-http.client :as http]))
@@ -67,12 +68,21 @@
    (let [wallet (ag/c->w card)]
     (conj so-far [:self (uri card wallet)])))
 
+(defn trustpool-link [so-far card]
+  (conj so-far [:trustpool (tp/uri (ag/c->w card)
+                                   (ag/c->tp card))]))
+
+(defn otherparty-link [so-far card]
+  (conj so-far [:otherParty (:target-uri card)]))
+
 (extend-type CallingCard
   render/Linked
 
   (links [card]
     (-> {}
-        (self-link card))))
+        (self-link card)
+        (trustpool-link card)
+        (otherparty-link card))))
 
 (extend-type CallingCard
   render/Resource

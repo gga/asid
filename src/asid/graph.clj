@@ -40,6 +40,9 @@
     (an/child ..card.. :addsidentity) => ..pool..
     (an/superior ..pool.. :trustpool) => "wallet"))
 
+(defn c->tp [card]
+  (an/child card :addsidentity))
+
 (defn tp->w [pool]
   (an/superior pool :trustpool))
 
