@@ -103,11 +103,11 @@
                                (crr/conn-req-from-wallet connreqid)
                                ar/resource))
                   
-                 (PUT "/:walletid/request/:connreqid" [walletid connreqid :as {updates :json-doc}]
-                      (dofailure [wallet (wr/get-wallet walletid repo)]
-                                 (fail-> wallet
-                                         (crr/conn-req-from-wallet connreqid)
-                                         (aa/accept wallet updates)
-                                         ar/resource)))
+                  (PUT "/:walletid/request/:connreqid" [walletid connreqid :as {updates :json-doc}]
+                       (dofailure [wallet (wr/get-wallet walletid repo)]
+                                  (fail-> wallet
+                                          (crr/conn-req-from-wallet connreqid)
+                                          (aa/accept wallet updates)
+                                          ar/resource)))
 
                   (route/not-found (afr/file-resource "not-found.html")))))

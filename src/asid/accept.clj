@@ -13,8 +13,8 @@
     (log/debug "Challenge: " (cs/join ", " challenge-set))
     (log/debug "Bag: " (cs/join ", " (-> wallet :bag keys set)))
     (if (set/subset? challenge-set (-> wallet :bag keys set))
-     conn-req
-     (ed/precondition-failed (str "Must have in bag: " (cs/join ", " challenge-set))))))
+      conn-req
+      (ed/precondition-failed (str "Must have in bag: " (cs/join ", " challenge-set))))))
 
 (fact "unable to meet the challenge"
   (let [conn-req {:pool-challenge ["dob"]}
