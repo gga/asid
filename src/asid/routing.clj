@@ -48,7 +48,7 @@
 
                                        "application/vnd.org.asidentity.introduction+json"
                                        (fail-> (wr/get-wallet id repo)
-                                               (i/intro-to-wallet)
+                                               i/intro-to-wallet
                                                ar/resource)))
 
                   (POST ["/:id/bag", :id aid/grammar] [id key value]
@@ -88,7 +88,7 @@
                   (GET "/:walletid/card/:cardid" [walletid cardid]
                        (fail-> (wr/get-wallet walletid repo)
                                (ccr/card-from-wallet cardid)
-                               (ar/resource)))
+                               ar/resource))
 
                   (POST ["/:id/letterplate", :id aid/grammar] [id :as {conn-req :json-doc}]
                         (dofailure [wallet (wr/get-wallet id repo)] 
@@ -100,6 +100,6 @@
                   (GET "/:walletid/request/:connreqid" [walletid connreqid]
                        (fail-> (wr/get-wallet walletid repo)
                                (crr/conn-req-from-wallet connreqid)
-                               (ar/resource)))
+                               ar/resource))
 
                   (route/not-found (afr/file-resource "not-found.html")))))
