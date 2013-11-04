@@ -9,6 +9,10 @@
 (defn not-found []
   (Failure. 404 "Not found."))
 
+(defn precondition-failed
+  ([] (precondition-failed "Precondition failed."))
+  ([msg] (Failure. 412 msg)))
+
 (defn unavailable []
   (Failure. 500 "Service unavailable."))
 

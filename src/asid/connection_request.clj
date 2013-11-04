@@ -20,7 +20,7 @@
                       (-> data :from)
                       (-> data :trust :name)
                       (-> data :trust :identity)
-                      (-> data :trust :challenge)
+                      (map keyword (-> data :trust :challenge))
                       (-> data :links :initiator)
                       (-> data :links :self)))
 

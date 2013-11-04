@@ -12,7 +12,7 @@
                                          (:from-identity node)
                                          (:pool-name node)
                                          (:pool-identity node)
-                                         (:pool-challenge node)
+                                         (map keyword (:pool-challenge node))
                                          (:initiator-uri node)
                                          (:calling-card-uri node))
                      node))

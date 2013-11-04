@@ -72,11 +72,13 @@
     (to-hex (.sign sig))))
 
 (defn add-data [wallet key value]
-  (an/associate-node (Wallet. (:identity wallet)
-                              (assoc (:bag wallet) key value)
-                              (:signatures wallet)
-                              (:key wallet))
-                     wallet))
+  (let [updated (Wallet. (:identity wallet)
+                         (assoc (:bag wallet) key value)
+                         (:signatures wallet)
+                         (:key wallet))]
+    (if (an/has-node? wallet)
+      (an/associate-node updated wallet)
+      updated)))
 
 (fact
   (let [orig (new-wallet "id")

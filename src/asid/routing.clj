@@ -9,7 +9,8 @@
             [clojure.data.json :as json]
             [clojure.string :as cs])
 
-  (:require [asid.content-negotiation :as acn]
+  (:require [asid.accept :as aa]
+            [asid.content-negotiation :as acn]
             [asid.file-resource :as afr]
             [asid.nodes :as an]
             [asid.graph :as ag]
@@ -101,5 +102,12 @@
                        (fail-> (wr/get-wallet walletid repo)
                                (crr/conn-req-from-wallet connreqid)
                                ar/resource))
+                  
+                 (PUT "/:walletid/request/:connreqid" [walletid connreqid :as {updates :json-doc}]
+                      (dofailure [wallet (wr/get-wallet walletid repo)]
+                                 (fail-> wallet
+                                         (crr/conn-req-from-wallet connreqid)
+                                         (aa/accept wallet updates)
+                                         ar/resource)))
 
                   (route/not-found (afr/file-resource "not-found.html")))))
