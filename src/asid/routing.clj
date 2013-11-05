@@ -66,7 +66,7 @@
                         (dofailure [data (validate! pool-doc :not-empty :name)
                                     name (:name data)
                                     challenge-keys (:challenge data)
-                                    pool (tpr/save (tp/new-trust-pool name challenge-keys) repo)
+                                    pool (tpr/save (tp/new-trust-pool name challenge-keys))
                                     wallet (wr/get-wallet id repo)
                                     pool (ag/trustpool pool wallet)]
                                    (ar/created pool)))

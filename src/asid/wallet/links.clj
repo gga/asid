@@ -58,7 +58,7 @@
 (fact
   (let [repo (an/initialize!)] 
     (let [tw (wr/save (w/new-wallet "id") repo)
-          pool (tpr/save (tp/new-trust-pool "named" ["dob"]) repo)
+          pool (tpr/save (tp/new-trust-pool "named" ["dob"]))
           card (ccr/save (cc/new-calling-card "other-uri" "other-id"))]
       (ag/trustpool pool tw)
       (ag/adds-identity card pool)

@@ -73,7 +73,7 @@
 (fact "GET /<wallet-id>/trustpool/<pool-id>"
   (let [t-app (app)]
     (let [wallet (wr/save (w/new-wallet "seed") (:repo t-app))
-          pool (tpr/save (tp/new-trust-pool "pool" ["name" "dob"]) (:repo t-app))]
+          pool (tpr/save (tp/new-trust-pool "pool" ["name" "dob"]))]
       (ag/trustpool pool wallet)
       (let [resp ((:web t-app) (-> (mr/request :get (tp/uri wallet pool))
                                    (mr/header "Accept" "application/vnd.org.asidentity.trust-pool+json")))]
@@ -94,7 +94,7 @@
                                  (rur/header "Location" "http://example.com/conn-req"))))
     (let [t-app (app)]
       (let [initiator (wr/save (w/new-wallet "initiator") (:repo t-app))
-            pool (tpr/save (tp/new-trust-pool "pool" ["name"]) (:repo t-app))]
+            pool (tpr/save (tp/new-trust-pool "pool" ["name"]))]
         (ag/trustpool pool initiator)
         (let [resp ((:web t-app) (-> (mr/request :post (tp/uri initiator pool)
                                                  (json/write-str {:uri "http://example.com/other-id"
@@ -124,7 +124,7 @@
 (fact "GET /<wallet-id>/card/<card-id>"
   (let [t-app (app)]
     (let [wallet (wr/save (w/new-wallet "seed") (:repo t-app))
-          pool (tpr/save (tp/new-trust-pool "name" ["challenge"]) (:repo t-app))
+          pool (tpr/save (tp/new-trust-pool "name" ["challenge"]))
           card (ccr/save (cc/new-calling-card "target-uri" "target-id"))]
       (ag/trustpool pool wallet)
       (ag/adds-identity card pool)

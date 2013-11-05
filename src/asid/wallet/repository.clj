@@ -32,6 +32,11 @@
       (an/connect-nodes ctxt wallet :wallet)
       wallet)))
 
+(defn- find-wallet [wallet-id ctxt]
+  (if-let [wallet (an/node-with-identity ctxt :wallet wallet-id)]
+    wallet
+    (ed/not-found)))
+
 (defn get-wallet [id ctxt]
-  (fail-> (an/node-with-identity ctxt :wallet id)
+  (fail-> (find-wallet id ctxt)
           wallet-from-node))

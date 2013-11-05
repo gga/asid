@@ -1,6 +1,9 @@
 (ns asid.connection-request-repository
   (:use [asid.error.thread :only [fail->]])
-  (:require [asid.nodes :as an])
+
+  (:require [asid.error.definition :as ed]
+            [asid.nodes :as an])
+
   (:import [asid.connection_request ConnectionRequest]))
 
 (defn save [conn-req]
@@ -17,6 +20,11 @@
                                          (:calling-card-uri node))
                      node))
 
+(defn- find-conn-req [wallet conn-req-id]
+  (if-let [cr (an/node-with-identity wallet :requestsconn conn-req-id)]
+    cr
+    (ed/not-found)))
+
 (defn conn-req-from-wallet [wallet conn-req-id]
-  (fail-> (an/node-with-identity wallet :requestsconn conn-req-id)
+  (fail-> (find-conn-req wallet conn-req-id)
           conn-req-from-node))

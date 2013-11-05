@@ -15,7 +15,7 @@
 (fact "a graph starting with a wallet, then a trustpool and a calling card"
   (let [repo (an/initialize!)
         w (wr/save (w/new-wallet "seed") repo)
-        p (tpr/save (tp/new-trust-pool "pool" ["name"]) repo)
+        p (tpr/save (tp/new-trust-pool "pool" ["name"]))
         c (ccr/save (cc/new-calling-card "other-identity-uri" "other-identity"))]
     (trustpool p w)
     (adds-identity c p)

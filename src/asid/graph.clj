@@ -38,6 +38,14 @@
                         {:walletnode "node descriptor"}
                         "card") => ..cards..))
 
+(defn w->tp [wallet pool-id]
+  (an/node-with-identity wallet :trustpool pool-id))
+
+(fact
+  (w->tp ..wallet.. "pool-id") => ..trust-pool..
+  (provided
+    (an/node-with-identity ..wallet.. :trustpool "pool-id") => ..trust-pool..))
+
 (defn c->w [card]
   (-> (an/child card :addsidentity)
       (an/superior :trustpool)))

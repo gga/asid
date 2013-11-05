@@ -85,8 +85,7 @@
           (get "dest")
           :self
           nn/fetch-from
-          node-to-object)
-      (ed/not-found))))
+          node-to-object))))
 
 (defn nodes-by-cypher [query params column]
   (let [results (cy/tquery query params)]

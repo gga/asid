@@ -8,8 +8,11 @@
 
 (defrecord TrustPool [name identity challenge])
 
-(defn new-trust-pool [name req-keys]
-  (TrustPool. name (aid/new-identity name) req-keys))
+(defn new-trust-pool
+  ([name req-keys] (new-trust-pool (aid/new-identity name)
+                                   name
+                                   req-keys))
+  ([identity name req-keys] (TrustPool. name identity req-keys)))
 
 (defn uri [wallet pool]
   (str (w/uri wallet) "/trustpool/" (:identity pool)))

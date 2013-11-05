@@ -4,6 +4,8 @@
 
   (:require [asid.error.definition :as ed]
             [asid.graph :as ag]
+            [asid.trust-pool :as tp]
+            [asid.trust-pool-repository :as tpr]
             [clojure.set :as set]
             [clojure.string :as cs]
             [clojure.tools.logging :as log]))
@@ -26,11 +28,40 @@
     (:status challenged) => 412
     (:message challenged) => "Missing from bag: dob"))
 
-(defn accept [conn-req wallet updates]
-  (fail-> (meet-challenge? conn-req wallet)))
+(defn- add-trust-pool [conn-req wallet]
+  (if-let [pool (ag/w->tp wallet (:pool-identity conn-req))]
+    pool
+    (let [pool (tpr/save (tp/new-trust-pool (:pool-identity conn-req)
+                                            (:pool-name conn-req)
+                                            (:pool-challenge conn-req)))]
+      (ag/trustpool pool wallet))))
 
 (fact
-  (accept ..conn-req.. ..wallet.. ..updates..) => ..conn-req..
+  (add-trust-pool {:pool-identity "pool-id"} ..wallet..) => ..pool..
   (provided
-    (meet-challenge? ..conn-req.. ..wallet..) => ..conn-req..))
+    (ag/w->tp ..wallet.. "pool-id") => ..pool..)
+
+  (add-trust-pool {:pool-identity "pool id"
+                   :pool-name "pool name"
+                   :pool-challenge ["challenge"]} ..wallet..) => ..linked-pool..
+  (provided
+    (ag/w->tp ..wallet.. "pool id") => nil
+    (tpr/save anything) => ..trust-pool..
+    (ag/trustpool ..trust-pool.. ..wallet..) => ..linked-pool..))
+
+(defn accept [conn-req wallet updates]
+  (fail-> (meet-challenge? conn-req wallet)
+          (add-trust-pool wallet)))
+
+(fact
+  (let [conn-req {:pool-name "pool name"
+                  :pool-identity "pool id"
+                  :pool-challenge ["challenge"]}]
+    (accept conn-req ..wallet.. ..updates..) => ..trust-pool..
+    (provided
+      (meet-challenge? conn-req ..wallet..) => conn-req
+      (ag/w->tp ..wallet.. "pool id") => nil
+      (tp/new-trust-pool "pool id" "pool name" ["challenge"]) => ..trust-pool..
+      (tpr/save ..trust-pool..) => ..trust-pool..
+      (ag/trustpool ..trust-pool.. ..wallet..) => ..trust-pool..)))
 
