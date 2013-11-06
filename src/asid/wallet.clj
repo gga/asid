@@ -2,13 +2,12 @@
   (:use midje.sweet)
   (:use asid.strings)
 
-  (:require [clojure.data.json :as json]
-            [asid.identity :as aid]
+  (:require [asid.identity :as aid]
             [asid.nodes :as an]
             [asid.render :as render])
 
   (:import [org.bouncycastle.jce.provider BouncyCastleProvider]
-           [java.security KeyFactory Security KeyPairGenerator SecureRandom Signature]
+           [java.security KeyFactory Security KeyPairGenerator SecureRandom]
            [java.security.spec ECGenParameterSpec PKCS8EncodedKeySpec]))
 
 (defn new-key-pair []
@@ -59,17 +58,6 @@
 (defn private-key [wallet]
   (let [factory (KeyFactory/getInstance "ECDSA" "BC")]
     (.generatePrivate factory (PKCS8EncodedKeySpec. (from-hex (-> wallet :key :private))))))
-
-(defn sign [me other-id key value]
-  (Security/addProvider (BouncyCastleProvider.))
-  (let [sig (Signature/getInstance "ECDSA" "BC")
-        packet (json/write-str {:signer (-> me :identity)
-                                :trustee other-id
-                                :key key
-                                :value value})]
-    (.initSign sig (private-key me) (SecureRandom.))
-    (.update sig (.getBytes packet "UTF-8"))
-    (to-hex (.sign sig))))
 
 (defn add-data [wallet key value]
   (let [updated (Wallet. (:identity wallet)

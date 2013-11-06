@@ -2,9 +2,10 @@
   (:use midje.sweet)
 
   (:require [asid.graph :as ag]
-            [asid.wallet :as w]
             [asid.identity :as aid]
-            [asid.render :as render]))
+            [asid.render :as render]
+            [asid.wallet :as w]
+            [asid.wallet.signing :as aws]))
 
 (defrecord TrustPool [name identity challenge])
 
@@ -22,7 +23,7 @@
 
 (defn add-to-pool [pool owner-wallet joiner challenge-response]
   (let [joiner-origin (Origin. (:identity joiner) (:url joiner))]
-    (Trustee. (map #(w/sign owner-wallet (:identity joiner) %1 %2)
+    (Trustee. (map #(aws/sign owner-wallet (:identity joiner) %1 %2)
                    (:challenge pool)
                    challenge-response) joiner-origin)))
 

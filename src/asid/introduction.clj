@@ -1,6 +1,7 @@
 (ns asid.introduction
   (:require [asid.render :as render]
-            [asid.wallet.links :as awl]))
+            [asid.wallet.links :as awl]
+            [asid.wallet.signing :as aws]))
 
 (defrecord Introduction [wallet])
 
@@ -11,8 +12,13 @@
   render/Resource
 
   (to-json [intro]
-    {:identity (-> intro :wallet :identity)
-     :key {:public (-> intro :wallet :key :public)}})
+    (let [wallet (:wallet intro)]
+      {:identity (-> wallet :identity)
+       :key {:public (-> wallet :key :public)}
+       :signatures {:identity (aws/sign wallet
+                                        (:identity wallet)
+                                        :identity
+                                        (:identity wallet))}}))
 
   (content-type [_]
     "application/vnd.org.asidentity.introduction+json"))

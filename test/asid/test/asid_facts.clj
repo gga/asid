@@ -49,9 +49,12 @@
     (let [wallet (wr/save (w/new-wallet "seed") (:repo t-app))
           resp ((:web t-app) (-> (mr/request :get (w/uri wallet))
                                  (mr/header "Accept" "application/vnd.org.asidentity.introduction+json")))
-          intro-doc (json/read-str (:body resp))]
+          intro-doc (json/read-str (:body resp) :key-fn keyword)]
       (:status resp) => 200
-      (-> intro-doc (get "bag")) => nil?)))
+      (-> intro-doc :identity) => (:identity wallet)
+      (-> intro-doc :key :public) => (-> wallet :key :public)
+      (-> intro-doc :signatures :identity) =not=> nil?
+      (-> intro-doc :bag) => nil?)))
 
 (fact "POST /<wallet-id>/bag"
   (let [t-app (app)]
