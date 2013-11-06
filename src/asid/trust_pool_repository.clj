@@ -2,6 +2,7 @@
   (:use [asid.error.thread :only [fail->]])
 
   (:require [asid.error.definition :as ed]
+            [asid.graph :as ag]
             [asid.nodes :as an])
 
   (:import [asid.trust_pool TrustPool]))
@@ -19,7 +20,7 @@
                      node))
 
 (defn- find-pool [wallet pool-id]
-  (if-let [pool (an/node-with-identity wallet :trustpool pool-id)]
+  (if-let [pool (ag/w->tp wallet pool-id)]
     pool
     (ed/not-found)))
 
