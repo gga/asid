@@ -46,22 +46,9 @@
                    :pool-challenge ["challenge"]} ..wallet..) => ..linked-pool..
   (provided
     (ag/w->tp ..wallet.. "pool id") => nil
-    (tpr/save anything) => ..trust-pool..
-    (ag/trustpool ..trust-pool.. ..wallet..) => ..linked-pool..))
+    (tpr/save anything) => "trust pool"
+    (ag/trustpool "trust pool" ..wallet..) => ..linked-pool..))
 
 (defn accept [conn-req wallet updates]
   (fail-> (meet-challenge? conn-req wallet)
           (add-trust-pool wallet)))
-
-(fact
-  (let [conn-req {:pool-name "pool name"
-                  :pool-identity "pool id"
-                  :pool-challenge ["challenge"]}]
-    (accept conn-req ..wallet.. ..updates..) => ..trust-pool..
-    (provided
-      (meet-challenge? conn-req ..wallet..) => conn-req
-      (ag/w->tp ..wallet.. "pool id") => nil
-      (tp/new-trust-pool "pool id" "pool name" ["challenge"]) => ..trust-pool..
-      (tpr/save ..trust-pool..) => ..trust-pool..
-      (ag/trustpool ..trust-pool.. ..wallet..) => ..trust-pool..)))
-
