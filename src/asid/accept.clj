@@ -31,8 +31,7 @@
 (defn- add-trust-pool [conn-req wallet]
   (if-let [pool (ag/w->tp wallet (:pool-identity conn-req))]
     pool
-    (let [pool (tpr/save (tp/new-trust-pool (:pool-identity conn-req)
-                                            (:pool-name conn-req)
+    (let [pool (tpr/save (tp/new-trust-pool (:pool-name conn-req)
                                             (:pool-challenge conn-req)))]
       (ag/trustpool pool wallet))))
 

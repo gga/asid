@@ -9,11 +9,18 @@
 
 (defrecord TrustPool [name identity challenge])
 
-(defn new-trust-pool
-  ([name req-keys] (new-trust-pool (aid/new-identity name)
-                                   name
-                                   req-keys))
-  ([identity name req-keys] (TrustPool. name identity req-keys)))
+(defn trust-pool-description [name challenge]
+  {:name name
+   :challenge challenge})
+
+(fact
+  (trust-pool-description "pool name" ["key1" "key2"]) => {:name "pool name"
+                                                           :challenge ["key1" "key2"]})
+
+(defn new-trust-pool [name req-keys]
+  (TrustPool. name
+              (aid/sign-message (trust-pool-description name req-keys))
+              req-keys))
 
 (defn uri [wallet pool]
   (str (w/uri wallet) "/trustpool/" (:identity pool)))

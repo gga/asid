@@ -16,7 +16,7 @@
     (accept conn-req wallet ..updates..) => ..trust-pool..
     (provided
       (ag/w->tp wallet "pool id") => nil
-      (tp/new-trust-pool "pool id" "pool name" ["challenge"]) => ..trust-pool..
+      (tp/new-trust-pool "pool name" ["challenge"]) => ..trust-pool..
       (tpr/save ..trust-pool..) => ..trust-pool..
       (ag/trustpool ..trust-pool.. wallet) => ..trust-pool..)))
 
