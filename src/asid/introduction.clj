@@ -15,10 +15,7 @@
     (let [wallet (:wallet intro)]
       {:identity (-> wallet :identity)
        :key {:public (-> wallet :key :public)}
-       :signatures {:identity (aws/sign wallet
-                                        (:identity wallet)
-                                        :identity
-                                        (:identity wallet))}}))
+       :signatures {:identity (aws/sign wallet (aws/identity-packet wallet))}}))
 
   (content-type [_]
     "application/vnd.org.asidentity.introduction+json"))
