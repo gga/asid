@@ -2,7 +2,8 @@
   (:use midje.sweet
         asid.error.definition)
 
-  (:require [clojure.algo.monads :as monad])
+  (:require [clojure.algo.monads :as monad]
+            [clojure.tools.logging :as log])
 
   (:import [asid.error.definition Failure]))
 
@@ -83,3 +84,8 @@
 (fact
   (more-steps 10) => 100
   (more-steps 100) => (partial instance? Failure))
+
+(defn -log-> [obj msg]
+  (log/debug msg)
+  (log/debug obj)
+  obj)
