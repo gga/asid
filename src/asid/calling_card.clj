@@ -23,18 +23,10 @@
                 target-uri
                 other-party-identity))
 
-(defn- http-failed? [resp]
-  (let [status (:status resp)]
-    (cond
-     (some #{404 406} [status]) (ed/bad-request "Remote endpoint did not understand request.")
-     (< 399 status 500) (ed/unavailable)
-     (> status 500) (ed/bad-gateway)
-     :else resp)))
-
 (defn- find-letterplate [card]
   (fail-> (http/get (:target-uri card)
                     {:accept "application/vnd.org.asidentity.introduction+json"})
-          http-failed?
+          ed/http-failed?
           :body
           (json/read-str :key-fn keyword)))
 
@@ -50,7 +42,7 @@
   (fail-> (as/resolve-url (-> intro :links :letterplate) (:target-uri card))
           (http/post {:body (json/write-str (connection-request card wallet pool))
                       :content-type "vnd/application.org.asidentity.connection-request+json"})
-          http-failed?
+          ed/http-failed?
           (-> :headers (get "location"))))
 
 (defn- remember-counterpart [location card]
