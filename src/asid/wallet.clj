@@ -8,7 +8,7 @@
 
   (:import [org.bouncycastle.jce.provider BouncyCastleProvider]
            [java.security KeyFactory Security KeyPairGenerator SecureRandom]
-           [java.security.spec ECGenParameterSpec PKCS8EncodedKeySpec]))
+           [java.security.spec ECGenParameterSpec PKCS8EncodedKeySpec X509EncodedKeySpec]))
 
 (defn new-key-pair []
   (Security/addProvider (BouncyCastleProvider.))
@@ -58,6 +58,10 @@
 (defn private-key [wallet]
   (let [factory (KeyFactory/getInstance "ECDSA" "BC")]
     (.generatePrivate factory (PKCS8EncodedKeySpec. (from-hex (-> wallet :key :private))))))
+
+(defn public-key [wallet]
+  (let [factory (KeyFactory/getInstance "ECDSA" "BC")]
+    (.generatePublic factory (X509EncodedKeySpec. (from-hex (-> wallet :key :public))))))
 
 (defn add-data [wallet key value]
   (let [updated (Wallet. (:identity wallet)
