@@ -8,9 +8,15 @@
   (:import [org.bouncycastle.jce.provider BouncyCastleProvider]
            [java.security Security Signature SecureRandom]))
 
+(defn data-packet [key value]
+  [:key key
+   :value value])
+
+(fact
+  (data-packet :a-key "some value") => [:key :a-key :value "some value"])
+
 (defn identity-packet [wallet-id]
-  [:key :identity
-   :value wallet-id])
+  (data-packet :identity wallet-id))
 
 (fact
   (let [wallet (w/new-wallet "seed")]
