@@ -14,11 +14,38 @@
             [clojure.string :as cs]
             [clojure.tools.logging :as log]))
 
-(defn- meet-challenge? [conn-req wallet]
+(defn- new-challenge-response [conn-req wallet]
+  (let [chal-sigs (vec (map #(aws/sign wallet
+                                       (aws/data-packet % (-> wallet :bag %)))
+                            (:pool-challenge conn-req)))]
+    {:trustee-signature (aws/sign wallet
+                                  (aws/identity-packet (:from-identity conn-req)))
+     :bag (zipmap (:pool-challenge conn-req)
+                  (map #(% (:bag wallet)) (:pool-challenge conn-req)))
+     :bag-signature (zipmap (:pool-challenge conn-req) chal-sigs)}))
+
+(fact
+  (let [wallet (w/add-data (w/new-wallet "seed") :dob "1/1/1970")
+        chal-resp (new-challenge-response {:from-identity "initiator-id"
+                                           :pool-challenge [:dob]}
+                                          wallet)]
+    (-> chal-resp :bag :dob) => "1/1/1970"
+    (aws/verify wallet
+                (-> chal-resp :bag-signature :dob)
+                (-> (aws/data-packet :dob "1/1/1970")
+                    (aws/packet-signer wallet)
+                    json/write-str)) => truthy
+    (aws/verify wallet
+                (-> chal-resp :trustee-signature)
+                (-> (aws/identity-packet "initiator-id")
+                    (aws/packet-signer wallet)
+                    json/write-str)) => truthy))
+
+(defn- meet-challenge [conn-req wallet]
   (let [challenge-set (set (:pool-challenge conn-req))
         bag-key-set (-> wallet :bag keys set)]
     (if (set/subset? challenge-set bag-key-set)
-      conn-req
+      (new-challenge-response conn-req wallet)
       (ed/precondition-failed (str "Missing from bag: "
                                    (cs/join ", " (set/difference challenge-set
                                                                  bag-key-set)))))))
@@ -26,11 +53,11 @@
 (fact "unable to meet the challenge"
   (let [conn-req {:pool-challenge ["dob"]}
         wallet {:bag {"name" "a-name"}}
-        challenged (meet-challenge? conn-req wallet)]
+        challenged (meet-challenge conn-req wallet)]
     (:status challenged) => 412
     (:message challenged) => "Missing from bag: dob"))
 
-(defn- add-trust-pool [conn-req wallet]
+(defn- add-trust-pool [_ conn-req wallet]
   (if-let [pool (ag/w->tp wallet (:pool-identity conn-req))]
     ;; TODO: Verify that there isn't a trust pool with the same name,
     ;; but a different identity
@@ -40,13 +67,15 @@
       (ag/trustpool pool wallet))))
 
 (fact
-  (add-trust-pool {:pool-identity "pool-id"} ..wallet..) => ..pool..
+  (add-trust-pool ..trustee.. {:pool-identity "pool-id"} ..wallet..) => ..pool..
   (provided
     (ag/w->tp ..wallet.. "pool-id") => ..pool..)
 
-  (add-trust-pool {:pool-identity "pool id"
+  (add-trust-pool ..trustee..
+                  {:pool-identity "pool id"
                    :pool-name "pool name"
-                   :pool-challenge ["challenge"]} ..wallet..) => ..linked-pool..
+                   :pool-challenge ["challenge"]}
+                  ..wallet..) => ..linked-pool..
   (provided
     (ag/w->tp ..wallet.. "pool id") => nil
     (tpr/save anything) => "trust pool"
@@ -60,41 +89,15 @@
           (json/read-str :key-fn keyword)
           (-> :links :challenge)))
 
-(defn- challenge-response [wallet conn-req]
-  (let [id-sig (aws/sign wallet
-                         (aws/identity-packet (:from-identity conn-req)))
-        chal-sigs (vec (map #(aws/sign wallet
-                                       (aws/data-packet % (-> wallet :bag %)))
-                            (:pool-challenge conn-req)))]
-    {:signatures (zipmap (conj (:pool-challenge conn-req) :identity)
-                         (conj chal-sigs id-sig))}))
-
-(fact
-  (let [wallet (w/add-data (w/new-wallet "seed") :dob "1/1/1970")
-        chal-resp (challenge-response wallet {:from-identity "initiator-id"
-                                              :pool-challenge [:dob]})]
-    (aws/verify wallet
-                (-> chal-resp :signatures :identity)
-                (-> (aws/identity-packet "initiator-id")
-                    (aws/packet-signer wallet)
-                    json/write-str)) => truthy
-    (aws/verify wallet
-                (-> chal-resp :signatures :dob)
-                (-> (aws/data-packet :dob "1/1/1970")
-                    (aws/packet-signer wallet)
-                    json/write-str)) => truthy))
-
-(defn- submit-challenge [challenge conn-req wallet]
-  (let [chal-response (challenge-response wallet conn-req)]
-    (fail-> (find-challenge-slot (:calling-card-uri conn-req))
-            (http/put {:body (json/write-str chal-response)
-                       :content-type "application/vnd.org.asidentity.challenge+json"})
-            ed/http-failed?
-            :body
-            (json/read-str :key-fn keyword))))
+(defn- submit-challenge [chal-resp conn-req wallet]
+  (fail-> (find-challenge-slot (:calling-card-uri conn-req))
+          (http/put {:body (json/write-str chal-resp)
+                     :content-type "application/vnd.org.asidentity.challenge+json"})
+          ed/http-failed?
+          :body
+          (json/read-str :key-fn keyword)))
 
 (defn accept [conn-req wallet updates]
-  (fail-> (meet-challenge? conn-req wallet)
-          (add-trust-pool wallet)
-          :challenge
-          (submit-challenge conn-req wallet)))
+  (fail-> (meet-challenge conn-req wallet)
+          (submit-challenge conn-req wallet)
+          (add-trust-pool conn-req wallet)))

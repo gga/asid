@@ -163,15 +163,24 @@
 
 (fact "PUT /<wallet-id>/request/<conn-req-id>"
   (let [t-app (app)]
-    (let [wallet (wr/save (w/add-data (w/new-wallet "seed")
-                                      "challenge" "sample") (:repo t-app))
-          conn-req (crr/save (cr/new-connection-request {:from "initiator-id"
-                                                         :trust {:name "pool"
-                                                                 :identity "pool-id"
-                                                                 :challenge ["challenge"]}
-                                                         :links {:initiator "initiator-uri"
-                                                                 :self "calling-card-uri"}}))]
-      (ag/requests-connection conn-req wallet)
-      (let [resp ((:web t-app) (-> (mr/request :put (cr/uri conn-req wallet) (json/write-str {:accepted true}))
-                                   (mr/header "Content-Type" "application/vnd.org.asidentity.connection-request+json")))]
-        (:status resp) => 200))))
+    (hm/with-mock-http-server
+      (hm/mock "http://example.com"
+               (compojure/GET "/calling-card" []
+                              (json/write-str {:links {:challenge "http://example.com/challenge"}}))
+               (compojure/PUT "/challenge" []
+                              (json/write-str {:signatures {:identity "signed-trustee-id"
+                                                            :challenge "signed-value-value"}
+                                               :bag {:challenge "initiator's value"}})))
+
+      (let [wallet (wr/save (w/add-data (w/new-wallet "seed")
+                                        "challenge" "sample") (:repo t-app))
+            conn-req (crr/save (cr/new-connection-request {:from "initiator-id"
+                                                           :trust {:name "pool"
+                                                                   :identity "pool-id"
+                                                                   :challenge ["challenge"]}
+                                                           :links {:initiator "initiator-uri"
+                                                                   :self "http://example.com/calling-card"}}))]
+        (ag/requests-connection conn-req wallet)
+        (let [resp ((:web t-app) (-> (mr/request :put (cr/uri conn-req wallet) (json/write-str {:accepted true}))
+                                     (mr/header "Content-Type" "application/vnd.org.asidentity.connection-request+json")))]
+          (:status resp) => 200)))))
