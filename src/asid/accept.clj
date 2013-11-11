@@ -57,30 +57,6 @@
     (:status challenged) => 412
     (:message challenged) => "Missing from bag: dob"))
 
-(defn- add-trust-pool [_ conn-req wallet]
-  (if-let [pool (ag/w->tp wallet (:pool-identity conn-req))]
-    ;; TODO: Verify that there isn't a trust pool with the same name,
-    ;; but a different identity
-    pool
-    (let [pool (tpr/save (tp/new-trust-pool (:pool-name conn-req)
-                                            (:pool-challenge conn-req)))]
-      (ag/trustpool pool wallet))))
-
-(fact
-  (add-trust-pool ..trustee.. {:pool-identity "pool-id"} ..wallet..) => ..pool..
-  (provided
-    (ag/w->tp ..wallet.. "pool-id") => ..pool..)
-
-  (add-trust-pool ..trustee..
-                  {:pool-identity "pool id"
-                   :pool-name "pool name"
-                   :pool-challenge ["challenge"]}
-                  ..wallet..) => ..linked-pool..
-  (provided
-    (ag/w->tp ..wallet.. "pool id") => nil
-    (tpr/save anything) => "trust pool"
-    (ag/trustpool "trust pool" ..wallet..) => ..linked-pool..))
-
 (defn- find-challenge-slot [cc-uri]
   (fail-> (http/get cc-uri
                     {:accept "application/vnd.org.asidentity.calling-card+json"})
@@ -97,7 +73,33 @@
           :body
           (json/read-str :key-fn keyword)))
 
+(defn- add-trust-pool [conn-req wallet]
+  (if-let [pool (ag/w->tp wallet (:pool-identity conn-req))]
+    ;; TODO: Verify that there isn't a trust pool with the same name,
+    ;; but a different identity
+    pool
+    (let [pool (tpr/save (tp/new-trust-pool (:pool-name conn-req)
+                                            (:pool-challenge conn-req)))]
+      (ag/trustpool pool wallet))))
+
+(fact
+  (add-trust-pool {:pool-identity "pool-id"} ..wallet..) => ..pool..
+  (provided
+    (ag/w->tp ..wallet.. "pool-id") => ..pool..)
+
+  (add-trust-pool {:pool-identity "pool id"
+                   :pool-name "pool name"
+                   :pool-challenge ["challenge"]}
+                  ..wallet..) => ..linked-pool..
+  (provided
+    (ag/w->tp ..wallet.. "pool id") => nil
+    (tpr/save anything) => "trust pool"
+    (ag/trustpool "trust pool" ..wallet..) => ..linked-pool..))
+
+(defn- add-trustee [handshake conn-req wallet]
+  (add-trust-pool conn-req wallet))
+
 (defn accept [conn-req wallet updates]
   (fail-> (meet-challenge conn-req wallet)
           (submit-challenge conn-req wallet)
-          (add-trust-pool conn-req wallet)))
+          (add-trustee conn-req wallet)))

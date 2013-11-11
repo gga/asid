@@ -168,9 +168,9 @@
                (compojure/GET "/calling-card" []
                               (json/write-str {:links {:challenge "http://example.com/challenge"}}))
                (compojure/PUT "/challenge" []
-                              (json/write-str {:signatures {:identity "signed-trustee-id"
-                                                            :challenge "signed-value-value"}
-                                               :bag {:challenge "initiator's value"}})))
+                              (json/write-str {:trustee-signature "signed-other-identity"
+                                               :bag {:challenge "challenge value"}
+                                               :bag-signature {:challenge "signed-value"}})))
 
       (let [wallet (wr/save (w/add-data (w/new-wallet "seed")
                                         "challenge" "sample") (:repo t-app))
