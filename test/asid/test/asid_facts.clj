@@ -15,6 +15,7 @@
             [asid.identity :as aid]
             [asid.trust-pool :as tp]
             [asid.trust-pool-repository :as tpr]
+            [asid.trustee-repository :as tr]
             [asid.wallet :as w]
             [asid.wallet.repository :as wr]
             [asid.test.http-mock :as hm]))
@@ -186,4 +187,5 @@
         (let [resp ((:web t-app) (-> (mr/request :put (cr/uri conn-req wallet) (json/write-str {:accepted true}))
                                      (mr/header "Content-Type" "application/vnd.org.asidentity.connection-request+json")))]
           (:status resp) => 200
-          (tpr/pool-from-wallet wallet pool-id) =not=> nil?)))))
+          (tpr/pool-from-wallet wallet pool-id) =not=> nil?
+          (:status (tr/trustee-in-pool (tpr/pool-from-wallet wallet pool-id) "initiator-id")) =not=> 404)))))

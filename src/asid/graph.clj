@@ -46,6 +46,14 @@
   (provided
     (an/node-with-identity ..wallet.. :trustpool "pool-id") => ..trust-pool..))
 
+(defn tp->t [pool trustee-id]
+  (an/node-with-identity pool :trust trustee-id))
+
+(fact
+  (tp->t ..pool.. "trustee-id") => ..trustee..
+  (provided
+    (an/node-with-identity ..pool.. :trust "trustee-id") => ..trustee..))
+
 (defn c->w [card]
   (-> (an/child card :addsidentity)
       (an/superior :trustpool)))
