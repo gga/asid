@@ -12,6 +12,7 @@
             [asid.calling-card-repository :as ccr]
             [asid.connection-request :as cr]
             [asid.connection-request-repository :as crr]
+            [asid.identity :as aid]
             [asid.trust-pool :as tp]
             [asid.trust-pool-repository :as tpr]
             [asid.wallet :as w]
@@ -174,13 +175,15 @@
 
       (let [wallet (wr/save (w/add-data (w/new-wallet "seed")
                                         "challenge" "sample") (:repo t-app))
+            pool-id (aid/sign-message (tp/trust-pool-description "pool" ["challenge"]))
             conn-req (crr/save (cr/new-connection-request {:from "initiator-id"
                                                            :trust {:name "pool"
-                                                                   :identity "pool-id"
+                                                                   :identity pool-id
                                                                    :challenge ["challenge"]}
                                                            :links {:initiator "initiator-uri"
                                                                    :self "http://example.com/calling-card"}}))]
         (ag/requests-connection conn-req wallet)
         (let [resp ((:web t-app) (-> (mr/request :put (cr/uri conn-req wallet) (json/write-str {:accepted true}))
                                      (mr/header "Content-Type" "application/vnd.org.asidentity.connection-request+json")))]
-          (:status resp) => 200)))))
+          (:status resp) => 200
+          (tpr/pool-from-wallet wallet pool-id) =not=> nil?)))))

@@ -10,12 +10,12 @@
 (defrecord TrustPool [name identity challenge])
 
 (defn trust-pool-description [name challenge]
-  {:name name
-   :challenge challenge})
+  [:name name
+   :challenge challenge])
 
 (fact
-  (trust-pool-description "pool name" ["key1" "key2"]) => {:name "pool name"
-                                                           :challenge ["key1" "key2"]})
+  (trust-pool-description "pool name" ["key1" "key2"]) => [:name "pool name"
+                                                           :challenge ["key1" "key2"]])
 
 (defn new-trust-pool [name req-keys]
   (TrustPool. name
