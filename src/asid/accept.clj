@@ -4,6 +4,7 @@
 
   (:require [asid.error.definition :as ed]
             [asid.graph :as ag]
+            [asid.nodes :as an]
             [asid.trust-pool :as tp]
             [asid.trust-pool-repository :as tpr]
             [asid.wallet :as w]
@@ -96,8 +97,13 @@
     (tpr/save anything) => "trust pool"
     (ag/trustpool "trust pool" ..wallet..) => ..linked-pool..))
 
-(defn- add-trustee [handshake conn-req wallet]
-  (add-trust-pool conn-req wallet))
+(defn- verify-wallet [{id-sig :identity chal-sigs :challenge} conn-req wallet]
+  (let [sig (w/make-signature (:identity conn-req) id-sig chal-sigs)]
+    (ag/verifies (an/create-node sig) wallet)))
+
+(defn- add-trustee [{verification :verification, bag :bag} conn-req wallet]
+  (let [pool (add-trust-pool conn-req wallet)]
+    (fail-> (verify-wallet verification wallet))))
 
 (defn accept [conn-req wallet updates]
   (fail-> (meet-challenge conn-req wallet)

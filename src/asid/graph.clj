@@ -94,3 +94,7 @@
 (defn requests-connection [conn-req wallet]
   (an/connect-nodes wallet conn-req :requestsconn)
   conn-req)
+
+(defn verifies [sig wallet]
+  (an/connect-nodes wallet sig :verifies)
+  sig)

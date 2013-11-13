@@ -4,7 +4,8 @@
   (:require [asid.error.definition :as ed]
             [asid.graph :as ag]))
 
-(defn trustee-from-node [node])
+(defn trustee-from-node [node]
+  node)
 
 (defn- find-trustee [pool trustee-id]
   (if-let [trustee (ag/tp->t pool trustee-id)]

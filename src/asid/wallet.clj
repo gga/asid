@@ -79,6 +79,11 @@
     (-> added :identity) => (-> orig :identity)
     (-> added :key :public) => (-> orig :key :public)))
 
+(defn make-signature [other-id id-sig chal-sigs]
+  {:identity other-id
+   :identity-signature id-sig
+   :challenge chal-sigs})
+
 (extend-type Wallet
   render/Resource
 
