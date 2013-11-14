@@ -2,7 +2,12 @@
   (:use [asid.error.thread :only [fail->]])
 
   (:require [asid.error.definition :as ed]
-            [asid.graph :as ag]))
+            [asid.graph :as ag]
+            [asid.nodes :as an]))
+
+(defn save [trustee]
+  (an/associate-node trustee
+                     (an/create-node {:identity (:identity trustee)})))
 
 (defn trustee-from-node [node]
   node)

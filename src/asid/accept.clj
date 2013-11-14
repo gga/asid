@@ -7,6 +7,8 @@
             [asid.nodes :as an]
             [asid.trust-pool :as tp]
             [asid.trust-pool-repository :as tpr]
+            [asid.trustee :as t]
+            [asid.trustee-repository :as tr]
             [asid.wallet :as w]
             [asid.wallet.signing :as aws]
             [clj-http.client :as http]
@@ -98,12 +100,18 @@
     (ag/trustpool "trust pool" ..wallet..) => ..linked-pool..))
 
 (defn- verify-wallet [{id-sig :identity chal-sigs :challenge} conn-req wallet]
-  (let [sig (w/make-signature (:identity conn-req) id-sig chal-sigs)]
+  (let [sig (w/make-signature (:identity conn-req) id-sig (:challenge chal-sigs))]
     (ag/verifies (an/create-node sig) wallet)))
+
+(defn- connect-trustee [sigs bag pool conn-req wallet]
+  (let [trustee (tr/save (t/new-trustee (:from-identity conn-req)))]
+    (ag/verifies sigs trustee)
+    (ag/trustee trustee pool)))
 
 (defn- add-trustee [{verification :verification, bag :bag} conn-req wallet]
   (let [pool (add-trust-pool conn-req wallet)]
-    (fail-> (verify-wallet verification wallet))))
+    (fail-> (verify-wallet verification conn-req wallet)
+            (connect-trustee bag pool conn-req wallet))))
 
 (defn accept [conn-req wallet updates]
   (fail-> (meet-challenge conn-req wallet)

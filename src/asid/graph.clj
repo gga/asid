@@ -47,12 +47,12 @@
     (an/node-with-identity ..wallet.. :trustpool "pool-id") => ..trust-pool..))
 
 (defn tp->t [pool trustee-id]
-  (an/node-with-identity pool :trust trustee-id))
+  (an/node-with-identity pool :trustee trustee-id))
 
 (fact
   (tp->t ..pool.. "trustee-id") => ..trustee..
   (provided
-    (an/node-with-identity ..pool.. :trust "trustee-id") => ..trustee..))
+    (an/node-with-identity ..pool.. :trustee "trustee-id") => ..trustee..))
 
 (defn c->w [card]
   (-> (an/child card :addsidentity)
@@ -98,3 +98,7 @@
 (defn verifies [sig wallet]
   (an/connect-nodes wallet sig :verifies)
   sig)
+
+(defn trustee [trustee pool]
+  (an/connect-nodes pool trustee :trustee)
+  trustee)
