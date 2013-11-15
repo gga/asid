@@ -114,6 +114,7 @@
 (fact "POST /<wallet-id>/letterplate"
   (let [t-app (app)]
     (let [conn-req {:from "initiator-id"
+                    :key "initiator-public-key"
                     :trust {:name "pool"
                             :identity "pool-id"
                             :challenge ["key"]}
@@ -146,6 +147,7 @@
   (let [t-app (app)]
     (let [wallet (wr/save (w/new-wallet "seed") (:repo t-app))
           conn-req (crr/save (cr/new-connection-request {:from "initiator-id"
+                                                         :key "initiator-public-key"
                                                          :trust {:name "pool"
                                                                  :identity "pool-id"
                                                                  :challenge ["challenge"]}
@@ -164,7 +166,8 @@
         (-> body :links :callingCard) => "calling-card-uri"))))
 
 (fact "PUT /<wallet-id>/request/<conn-req-id>"
-  (let [t-app (app)]
+  (let [t-app (app)
+        the-other (w/new-wallet "the other wallet")]
     (hm/with-mock-http-server
       (hm/mock "http://example.com"
                (compojure/GET "/calling-card" []
@@ -178,7 +181,8 @@
       (let [wallet (wr/save (w/add-data (w/new-wallet "seed")
                                         "challenge" "sample") (:repo t-app))
             pool-id (aid/sign-message (tp/trust-pool-description "pool" ["challenge"]))
-            conn-req (crr/save (cr/new-connection-request {:from "initiator-id"
+            conn-req (crr/save (cr/new-connection-request {:from (:identity the-other)
+                                                           :key (-> the-other :key :public)
                                                            :trust {:name "pool"
                                                                    :identity pool-id
                                                                    :challenge ["challenge"]}

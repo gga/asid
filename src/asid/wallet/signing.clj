@@ -33,12 +33,15 @@
     (.update sig (.getBytes packet-text "UTF-8"))
     (as/to-hex (.sign sig))))
 
-(defn verify [me signature packet-text]
+(defn verify-with-key [key signature packet-text]
   (Security/addProvider (BouncyCastleProvider.))
   (let [sig (Signature/getInstance "ECDSA" "BC")]
-    (.initVerify sig (w/public-key me))
+    (.initVerify sig key)
     (.update sig (.getBytes packet-text "UTF-8"))
     (.verify sig (as/from-hex signature))))
+
+(defn verify [me signature packet-text]
+  (verify-with-key (w/public-key me) signature packet-text))
 
 (fact
   (let [wallet (w/new-wallet "seed")]

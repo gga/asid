@@ -26,6 +26,7 @@
   (let [repo (an/initialize!)
         w (wr/save (w/new-wallet "seed") repo)
         cr (crr/save (cr/new-connection-request {:from "initiator-id"
+                                                 :key "initiator-public-key"
                                                  :trust {:name "pool"
                                                          :identity "pool-id"
                                                          :challenge ["a" "list"]}

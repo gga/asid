@@ -6,6 +6,7 @@
 
 (defrecord ConnectionRequest [identity
                               from-identity
+                              from-key
                               pool-name
                               pool-identity
                               pool-challenge
@@ -18,6 +19,7 @@
 (defn new-connection-request [data]
   (ConnectionRequest. (aid/new-identity (-> data :from))
                       (-> data :from)
+                      (-> data :key)
                       (-> data :trust :name)
                       (-> data :trust :identity)
                       (map keyword (-> data :trust :challenge))

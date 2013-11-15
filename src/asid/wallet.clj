@@ -59,9 +59,12 @@
   (let [factory (KeyFactory/getInstance "ECDSA" "BC")]
     (.generatePrivate factory (PKCS8EncodedKeySpec. (from-hex (-> wallet :key :private))))))
 
-(defn public-key [wallet]
+(defn parse-public-key [key-text]
   (let [factory (KeyFactory/getInstance "ECDSA" "BC")]
-    (.generatePublic factory (X509EncodedKeySpec. (from-hex (-> wallet :key :public))))))
+    (.generatePublic factory (X509EncodedKeySpec. (from-hex key-text)))))
+
+(defn public-key [wallet]
+  (parse-public-key (-> wallet :key :public)))
 
 (defn add-data [wallet key value]
   (let [updated (Wallet. (:identity wallet)

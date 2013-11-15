@@ -12,6 +12,7 @@
 
 (defn conn-req-from-node [node]
   (an/associate-node (ConnectionRequest. (:identity node)
+                                         (:from-key node)
                                          (:from-identity node)
                                          (:pool-name node)
                                          (:pool-identity node)
