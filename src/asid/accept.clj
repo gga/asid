@@ -108,11 +108,6 @@
     (ag/verifies sigs trustee)
     (ag/trustee trustee pool)))
 
-(defn- add-trustee [{verification :verification, bag :bag} conn-req wallet]
-  (let [pool (add-trust-pool conn-req wallet)]
-    (fail-> (verify-wallet verification conn-req wallet)
-            (connect-trustee bag pool conn-req wallet))))
-
 (defn- confirm-handshake [handshake conn-req]
   (let [from-key (w/parse-public-key (:from-key conn-req))
         id-packet (aws/packet-signer (aws/identity-packet (:from-identity conn-req))
@@ -121,6 +116,11 @@
                          (-> handshake :verification :identity)
                          (json/write-str id-packet)))
   handshake)
+
+(defn- add-trustee [{verification :verification, bag :bag} conn-req wallet]
+  (let [pool (add-trust-pool conn-req wallet)]
+    (fail-> (verify-wallet verification conn-req wallet)
+            (connect-trustee bag pool conn-req wallet))))
 
 (defn accept [conn-req wallet updates]
   (fail-> (meet-challenge conn-req wallet)

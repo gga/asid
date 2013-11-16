@@ -196,4 +196,4 @@
                                      (mr/header "Content-Type" "application/vnd.org.asidentity.connection-request+json")))]
           (:status resp) => 200
           (tpr/pool-from-wallet wallet pool-id) =not=> nil?
-          (:status (tr/trustee-in-pool (tpr/pool-from-wallet wallet pool-id) "initiator-id")) =not=> 404)))))
+          (:status (tr/trustee-in-pool (tpr/pool-from-wallet wallet pool-id) (:identity the-other))) =not=> 404)))))
