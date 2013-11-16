@@ -18,6 +18,7 @@
             [asid.trustee-repository :as tr]
             [asid.wallet :as w]
             [asid.wallet.repository :as wr]
+            [asid.wallet.signing :as aws]
             [asid.test.http-mock :as hm]))
 
 (fact "GET /"
@@ -167,13 +168,15 @@
 
 (fact "PUT /<wallet-id>/request/<conn-req-id>"
   (let [t-app (app)
-        the-other (w/new-wallet "the other wallet")]
+        the-other (w/new-wallet "the other wallet")
+        signed-id (aws/sign the-other
+                            (aws/identity-packet (:identity the-other)))]
     (hm/with-mock-http-server
       (hm/mock "http://example.com"
                (compojure/GET "/calling-card" []
                               (json/write-str {:links {:challenge "http://example.com/challenge"}}))
                (compojure/PUT "/challenge" []
-                              (json/write-str {:verification {:identity "signed-other-identity"
+                              (json/write-str {:verification {:identity signed-id
                                                               :challenge {:challenge "signed-other-value"}}
                                                :bag {:challenge {:challenge "challenge value"}
                                                      :signature {:challenge "signed-value"}}})))

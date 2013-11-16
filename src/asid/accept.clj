@@ -114,13 +114,12 @@
             (connect-trustee bag pool conn-req wallet))))
 
 (defn- confirm-handshake [handshake conn-req]
-  (log/debug "Public key: " (:from-key conn-req))
   (let [from-key (w/parse-public-key (:from-key conn-req))
         id-packet (aws/packet-signer (aws/identity-packet (:from-identity conn-req))
                                      (:from-identity conn-req))]
     (aws/verify-with-key from-key
                          (-> handshake :verification :identity)
-                         id-packet))
+                         (json/write-str id-packet)))
   handshake)
 
 (defn accept [conn-req wallet updates]
