@@ -1,6 +1,6 @@
 (ns asid.accept
   (:use midje.sweet
-        [asid.error.thread :only [fail-> -log->]] )
+        [asid.error.thread :only [fail-> -log-> has-failed?]] )
 
   (:require [asid.error.definition :as ed]
             [asid.graph :as ag]
@@ -36,12 +36,12 @@
     (aws/verify wallet
                 (-> chal-resp :bag-signature :dob)
                 (-> (aws/data-packet :dob "1/1/1970")
-                    (aws/packet-signer wallet)
+                    (aws/packet-signer (:identity wallet))
                     json/write-str)) => truthy
     (aws/verify wallet
                 (-> chal-resp :trustee-signature)
                 (-> (aws/identity-packet "initiator-id")
-                    (aws/packet-signer wallet)
+                    (aws/packet-signer (:identity wallet))
                     json/write-str)) => truthy))
 
 (defn- meet-challenge [conn-req wallet]
@@ -112,10 +112,29 @@
   (let [from-key (w/parse-public-key (:from-key conn-req))
         id-packet (aws/packet-signer (aws/identity-packet (:from-identity conn-req))
                                      (:from-identity conn-req))]
-    (aws/verify-with-key from-key
-                         (-> handshake :verification :identity)
-                         (json/write-str id-packet)))
-  handshake)
+    (if (aws/verify-with-key from-key
+                             (-> handshake :verification :identity)
+                             (json/write-str id-packet))
+      handshake
+      (ed/bad-request "Identity signature is invalid."))))
+
+(facts "about confirm-handshake"
+  (fact "valid"
+    (let [other (w/add-data (w/new-wallet "another wallet") :name "other")]
+      (confirm-handshake {:verification {:identity (aws/sign other
+                                                             (aws/identity-packet (:identity other)))
+                                         :challenge {:name (aws/sign other
+                                                                     (aws/data-packet :name "mine"))}}}
+                         {:from-identity (:identity other)
+                          :from-key (-> other :key :public)})) =not=> has-failed?)
+
+  (fact "failed handshake"
+    (let [alice (w/new-wallet "trusted wallet")
+          eve (w/new-wallet "attacker wallet")]
+      (confirm-handshake {:verification {:identity (aws/sign eve
+                                                             (aws/identity-packet (:identity alice)))}}
+                         {:from-identity (:identity alice)
+                          :from-key (-> alice :key :public)}) => has-failed?)))
 
 (defn- add-trustee [{verification :verification, bag :bag} conn-req wallet]
   (let [pool (add-trust-pool conn-req wallet)]

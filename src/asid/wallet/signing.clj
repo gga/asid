@@ -22,13 +22,13 @@
   (let [wallet (w/new-wallet "seed")]
     (identity-packet (:identity wallet)) => [:key :identity :value (:identity wallet)]))
 
-(defn packet-signer [packet me]
-  (conj packet :signer (:identity me)))
+(defn packet-signer [packet me-id]
+  (conj packet :signer me-id))
 
 (defn sign [me packet]
   (Security/addProvider (BouncyCastleProvider.))
   (let [sig (Signature/getInstance "ECDSA" "BC")
-        packet-text (json/write-str (packet-signer packet me))]
+        packet-text (json/write-str (packet-signer packet (:identity me)))]
     (.initSign sig (w/private-key me) (SecureRandom.))
     (.update sig (.getBytes packet-text "UTF-8"))
     (as/to-hex (.sign sig))))
