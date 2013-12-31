@@ -43,18 +43,25 @@ Upon receiving a connection request, the trustee user agent will have to defer t
 Once the trustee has agreed to accept the connection request and join a trust network with the initiator, there are several steps that must be performed. At a high level:
 
 1. Build and submit the challenge response.
+
+   1. *Receive and verify the trustee's challenge response.*
+   2. *Build and submit initiator challenge response.*
+   
 2. Receive and verify the initiator's challenge response.
 3. Create trust pool, if required.
 4. Send existing trust pool connections to the initiator.
+
+   1. *Receive new trust pool members at the trust pool (may be an empty set).*
+   2. *Respond with existing trust pool connections.*
+   
 5. Receive existing trust pool connections from the initiator.
-
-The initiator user agent will be performing essentially the same steps. The only difference is that the trustee user agent initiated the process. For completeness:
-
-1. Receive and verify the trustee's challenge response.
-2. Build and submit initiator challenge response.
-3. (Nothing to do here as the trust pool already exists.)
-4. Receive new trust pool members at the trust pool (may be an empty set).
-5. Respond with existing trust pool connections.
 
 ### Build and submit challenge response
 
+### Receive and verify challenge response
+
+### Create trust pool
+
+### Send trust pool connections
+
+### Receive existing trust pool connections
