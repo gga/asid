@@ -8,6 +8,7 @@
             [asid.trust-pool :as tp]
             [asid.trust-pool-repository :as tpr]
             [asid.trustee :as t]
+            [asid.trustee-agent :as ta]
             [asid.trustee-repository :as tr]
             [asid.wallet :as w]
             [asid.wallet.signing :as aws]
@@ -44,11 +45,11 @@
                     (aws/packet-signer (:identity wallet))
                     json/write-str)) => truthy))
 
-(defn- meet-challenge [conn-req wallet]
-  (let [challenge-set (set (:pool-challenge conn-req))
+(defn- meet-challenge [trustee-agent wallet]
+  (let [challenge-set (ta/challenge trustee-agent)
         bag-key-set (-> wallet :bag keys set)]
     (if (set/subset? challenge-set bag-key-set)
-      (new-challenge-response conn-req wallet)
+      (new-challenge-response (ta/agent-conn-req trustee-agent) wallet)
       (ed/precondition-failed (str "Missing from bag: "
                                    (cs/join ", " (set/difference challenge-set
                                                                  bag-key-set)))))))
@@ -56,7 +57,7 @@
 (fact "unable to meet the challenge"
   (let [conn-req {:pool-challenge ["dob"]}
         wallet {:bag {"name" "a-name"}}
-        challenged (meet-challenge conn-req wallet)]
+        challenged (meet-challenge (ta/new-trustee-agent conn-req) wallet)]
     (:status challenged) => 412
     (:message challenged) => "Missing from bag: dob"))
 
@@ -142,7 +143,8 @@
             (connect-trustee bag pool conn-req wallet))))
 
 (defn accept [conn-req wallet updates]
-  (fail-> (meet-challenge conn-req wallet)
+  (fail-> (ta/new-trustee-agent conn-req)
+          (meet-challenge wallet)
           (submit-challenge conn-req wallet)
           (confirm-handshake conn-req)
           (add-trustee conn-req wallet)))
