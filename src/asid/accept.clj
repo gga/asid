@@ -46,12 +46,12 @@
                     json/write-str)) => truthy))
 
 (defn- meet-challenge [trustee-agent wallet]
-  (let [challenge-set (ta/challenge trustee-agent)
+  (let [challenge-key-set (ta/challenge trustee-agent)
         bag-key-set (-> wallet :bag keys set)]
-    (if (set/subset? challenge-set bag-key-set)
+    (if (set/subset? challenge-key-set bag-key-set)
       (new-challenge-response (ta/agent-conn-req trustee-agent) wallet)
       (ed/precondition-failed (str "Missing from bag: "
-                                   (cs/join ", " (set/difference challenge-set
+                                   (cs/join ", " (set/difference challenge-key-set
                                                                  bag-key-set)))))))
 
 (fact "unable to meet the challenge"
