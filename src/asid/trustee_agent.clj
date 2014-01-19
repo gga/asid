@@ -18,7 +18,7 @@
 (defn challenge [agent]
   (-> agent agent-conn-req :pool-challenge set))
 
-(defn sample-conn-req
+(defn- sample-conn-req
   ([] (sample-conn-req {}))
   ([args]
      (let [defaults {:from "other identity"
@@ -31,4 +31,6 @@
        (cr/new-connection-request (merge defaults args)))))
 
 (fact
-  (-> (sample-conn-req) new-trustee-agent challenge) => #{:sample :challenge})
+  (-> (sample-conn-req)
+      new-trustee-agent
+      challenge) => #{:sample :challenge})
