@@ -3,6 +3,7 @@
         [asid.error.thread :only [fail->]])
 
   (:require [clojure.data.json :as json]
+            [asid.http :as http]
             [asid.identity :as aid]
             [asid.wallet :as w]
             [asid.graph :as ag]
@@ -10,8 +11,7 @@
             [asid.strings :as as]
             [asid.trust-pool :as tp]
             [asid.error.definition :as ed]
-            [asid.current-request :as req]
-            [clj-http.client :as http]))
+            [asid.current-request :as req]))
 
 (defrecord CallingCard [identity target-uri other-party])
 
@@ -24,11 +24,8 @@
                 other-party-identity))
 
 (defn- find-letterplate [card]
-  (fail-> (http/get (:target-uri card)
-                    {:accept "application/vnd.org.asidentity.introduction+json"})
-          ed/http-failed?
-          :body
-          (json/read-str :key-fn keyword)))
+  (http/get (:target-uri card)
+            {:accept "application/vnd.org.asidentity.introduction+json"}))
 
 (defn- connection-request [card wallet pool]
   {:from (:identity wallet)
@@ -42,7 +39,6 @@
   (fail-> (as/resolve-url (-> intro :links :letterplate) (:target-uri card))
           (http/post {:body (json/write-str (connection-request card wallet pool))
                       :content-type "vnd/application.org.asidentity.connection-request+json"})
-          ed/http-failed?
           (-> :headers (get "location"))))
 
 (defn- remember-counterpart [location card]

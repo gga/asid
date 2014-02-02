@@ -95,7 +95,7 @@
              (compojure/GET "/other-id" []
                             (json/write-str {:links {:letterplate "http://example.com/other-id/letterplate"}}))
              (compojure/POST "/other-id/letterplate" []
-                             (-> (rur/response "Received calling card.")
+                             (-> (rur/response (json/write-str {:text "Received calling card."}))
                                  (rur/status 201)
                                  (rur/header "Location" "http://example.com/conn-req"))))
     (let [t-app (app)]

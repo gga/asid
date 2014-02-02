@@ -4,6 +4,7 @@
 
   (:require [asid.error.definition :as ed]
             [asid.graph :as ag]
+            [asid.http :as http]
             [asid.nodes :as an]
             [asid.trust-pool :as tp]
             [asid.trust-pool-repository :as tpr]
@@ -12,7 +13,6 @@
             [asid.trustee-repository :as tr]
             [asid.wallet :as w]
             [asid.wallet.signing :as aws]
-            [clj-http.client :as http]
             [clojure.data.json :as json]
             [clojure.set :as set]
             [clojure.string :as cs]
@@ -64,18 +64,12 @@
 (defn- find-challenge-slot [cc-uri]
   (fail-> (http/get cc-uri
                     {:accept "application/vnd.org.asidentity.calling-card+json"})
-          ed/http-failed?
-          :body
-          (json/read-str :key-fn keyword)
           (-> :links :challenge)))
 
 (defn- submit-challenge [chal-resp conn-req wallet]
   (fail-> (find-challenge-slot (:calling-card-uri conn-req))
           (http/put {:body (json/write-str chal-resp)
-                     :content-type "application/vnd.org.asidentity.challenge+json"})
-          ed/http-failed?
-          :body
-          (json/read-str :key-fn keyword)))
+                     :content-type "application/vnd.org.asidentity.challenge+json"})))
 
 (defn- add-trust-pool [conn-req wallet]
   (if-let [pool (ag/w->tp wallet (:pool-identity conn-req))]
