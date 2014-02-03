@@ -11,7 +11,7 @@
    :node-id (:id root-node)})
 
 (defn initialize! []
-  (let [neo-host (as/getenv "NEO4J_URL" "http://localhost:7474")]
+  (let [neo-host (as/getenv "GRAPHENEDB_URL" "http://localhost:7474")]
     (nr/connect! (str neo-host "/db/data"))
     (let [root (nn/get 0)
           asid-rels (nrl/outgoing-for root :types [:asid])]
