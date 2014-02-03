@@ -64,12 +64,14 @@
 (defn- find-challenge-slot [cc-uri]
   (fail-> (http/get cc-uri
                     {:accept "application/vnd.org.asidentity.calling-card+json"})
+          :body
           (-> :links :challenge)))
 
 (defn- submit-challenge [chal-resp conn-req wallet]
   (fail-> (find-challenge-slot (:calling-card-uri conn-req))
           (http/put {:body (json/write-str chal-resp)
-                     :content-type "application/vnd.org.asidentity.challenge+json"})))
+                     :content-type "application/vnd.org.asidentity.challenge+json"})
+          :body))
 
 (defn- add-trust-pool [conn-req wallet]
   (if-let [pool (ag/w->tp wallet (:pool-identity conn-req))]

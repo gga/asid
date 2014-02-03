@@ -24,8 +24,12 @@
                 other-party-identity))
 
 (defn- find-letterplate [card]
-  (http/get (:target-uri card)
-            {:accept "application/vnd.org.asidentity.introduction+json"}))
+  (let [identity-url (:target-uri card)]
+    (fail-> (http/get identity-url
+                      {:accept "application/vnd.org.asidentity.introduction+json"})
+            (:body)
+            (-> :links :letterplate)
+            (as/resolve-url identity-url))))
 
 (defn- connection-request [card wallet pool]
   {:from (:identity wallet)
@@ -35,11 +39,12 @@
    :links {:self (req/url-relative-to-request (uri card wallet))
            :initiator (req/url-relative-to-request (w/uri wallet))}})
 
-(defn- seek-introduction [intro card wallet pool]
-  (fail-> (as/resolve-url (-> intro :links :letterplate) (:target-uri card))
-          (http/post {:body (json/write-str (connection-request card wallet pool))
+(defn- seek-introduction [letterplate-url card wallet pool]
+  (fail-> (http/post letterplate-url
+                     {:body (json/write-str (connection-request card wallet pool))
                       :content-type "vnd/application.org.asidentity.connection-request+json"})
-          (-> :headers (get "location"))))
+          :headers
+          (get "location")))
 
 (defn- remember-counterpart [location card]
   (conj card [:counterpart location]))

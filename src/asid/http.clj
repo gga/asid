@@ -16,16 +16,12 @@
     (log/debug "Body: " (:body response))
     (fail-> response
             ed/http-failed?
-            :body
-            (json/read-str :key-fn keyword))))
-
-(fact)
+            (conj [:body
+                   (json/read-str (:body response) :key-fn keyword)]))))
 
 (defmacro verb [name wrap]
   `(defn ~name [uri# options#]
-     (http-wrapper (fn [uri opts] (~wrap uri opts))
-                   uri#
-                   options#)))
+     (http-wrapper ~wrap uri# options#)))
 
 (verb get client/get)
 (verb put client/put)
